@@ -1,86 +1,193 @@
-<!DOCTYPE html>
-<html>
-<head>
+  {% load static %}<!DOCTYPE html>
+  <html lang="es">
+  <head>
     <meta charset="utf-8">
     <style>
-        @page {
-            size: letter;
-            margin: 2cm;
-        }
-        body {
-            font-family: 'Times New Roman', serif;
-            line-height: 1.6;
-            color: #000;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 2cm;
-        }
-        .title {
-            font-size: 16pt;
-            font-weight: bold;
-            margin-bottom: 1cm;
-            text-decoration: underline;
-        }
-        .content {
-            text-align: justify;
-            margin-bottom: 1.5cm;
-        }
-        .signatures {
-            margin-top: 3cm;
-        }
-        .signature-line {
-            border-top: 1px solid #000;
-            width: 60%;
-            margin: 0.5cm 0;
-        }
-        .footer {
-            margin-top: 2cm;
-            text-align: center;
-            font-size: 10pt;
-            color: #666;
-        }
+      @page { size: letter; margin: 5mm 18mm 7mm 18mm; }
+      html, body { font-family: "Times New Roman", serif; color:#000; line-height:1.20; }
+
+      .u-center { text-align:center; }
+      .u-right  { text-align:right; }
+      .u-justify{ text-align:justify; }
+      .u-mt-8   { margin-top:4mm; }
+
+      .u-small {
+      display: block;
+      margin-top: 1mm;  
+      font-size: 8pt;
+      color: #666;
+      text-align: center;
+      }
+
+      .header { position: relative; min-height: 42mm; margin-bottom: 6mm; ; }
+      .header-grid { display: block; width:100%; }
+      .col-left  { float:left;  width:12%; min-height: 40mm; margin-left: -8mm; text-align: center; margin-bottom: -10mm;; }
+      .col-right { float:right; width:88%; min-height: 40mm; text-align:right; color:#888; font-size:11pt; letter-spacing: .2pt; margin-right: -10mm; margin-top: 2mm; line-height:1.4 ; }
+      .logo-box  { width: 36mm; height: 36mm; border: 1px dashed #bbb; margin-top: 2mm; display:inline-block; text-align:center; font-size:9pt; color:#999; line-height: 36mm;  }
+      .logo-img  { max-width:30mm; max-height:30mm; vertical-align:middle; opacity: 0.35;  }
+
+      .brand-center{
+      position: relative;       
+        width: 100%;
+        text-align: center;        
+        margin-top: -6mm;         
+        margin-bottom: 3mm;   
+        pointer-events: none;
+    
+      }
+
+      .brand-center img{
+        display: inline-block;     
+        max-width: 45mm;
+        max-height: 45mm;
+        opacity: .75  ;
+        transform: translateY(4mm);
+      
+    }
+
+
+      .motto { margin-top: -1mm; margin-bottom: 6mm; text-align:center; font-style: italic; color:#b22222; font-size: 11pt; }
+
+      .subject {text-align: right; margin-bottom: 6mm; font-size: 12pt; }
+      .subject .label { font-weight:bold; }
+      .subject .value { text-decoration: underline; }
+
+    
+      .title-to { font-weight:bold; }
+      .paragraph { text-align:justify; margin: 0 0 4.8mm 0; }
+      .strong { font-weight:bold; }
+      .sc { font-variant: small-caps; letter-spacing: .6pt; }
+
+      .brand-center-fixed {
+      text-align: center;
+      margin-top: -4mm;   
+      margin-bottom: 2mm; 
+          }
+
+      .brand-center-fixed img {
+      max-width: 55mm;
+      max-height: 55mm;
+      opacity: 0.22;      
+          }
+
+  
+      .attn { text-align:center; margin-top: 12mm; letter-spacing: 3.5pt; }
+
+      .signatures { margin-top: 26mm; display:block; width:100%; overflow:hidden; }
+      .sig-col   { width:48%; text-align:center; }
+      .sig-left  { float:left; }
+      .sig-right { float:right; }
+      .sig-line  { width:75%; border-top:1px solid #000; margin: 0 auto 3mm auto; height:0; }
+      .sig-name  { font-weight:bold; }
+      .sig-role  { font-size: 11pt; }
+
+      .footer { margin-top: 18mm; text-align:center; font-size:10pt; color:#666; line-height:1.35; }
+      .footer a { color:#666; text-decoration:none; } 
     </style>
-</head>
-<body>
-    <div class="header">
-        <h2>BENEMÉRITA ESCUELA NORMAL URBANA NOCTURNA DEL ESTADO</h2>
-        <h3>"ING. JOSÉ G. VALENZUELA"</h3>
-        <p>Clave: 02ENL0004Y</p>
-    </div>
-    
-    <div class="title">
-        CONSTANCIA DE ESTUDIOS
-    </div>
-    
-    <div class="content">
-        <p>El que suscribe, Director(a) de la Benemérita Escuela Normal Urbana Nocturna del Estado "Ing. José G. Valenzuela", con clave 02ENL0004Y, hace constar que:</p>
-        
-        <p style="text-align: center; font-weight: bold; margin: 1cm 0;">
-            {{ constancia.alumno.nombre_completo }}
-        </p>
-        
-        <p>Con número de matrícula <strong>{{ constancia.alumno.matricula }}</strong>, CURP <strong>{{ constancia.alumno.curp }}</strong>, es alumno(a) regular de esta institución y se encuentra inscrito(a) en el <strong>{{ constancia.alumno.semestre_actual }}° semestre</strong> de la <strong>{{ constancia.alumno.carrera.nombre }}</strong> en el turno <strong>{{ constancia.alumno.get_turno_display }}</strong>.</p>
-        
-        <p>Se extiende la presente constancia para los fines que al interesado(a) convengan, en la ciudad de Mexicali, Baja California, a los {{ constancia.fecha_emision|date:"d" }} días del mes de {{ constancia.fecha_emision|date:"F" }} del {{ constancia.fecha_emision|date:"Y" }}.</p>
-    </div>
-    
-    <div class="signatures">
-        <div style="float: left; width: 45%; text-align: center;">
-            <div class="signature-line"></div>
-            <p>Vo.Bo. Subdirección Académica</p>
+  </head>
+  <body> 
+
+    <header class="header">
+      <div class="header-grid">
+        <div class="col-left u-center">
+          <img class="logo-img"
+              src="{% if logo_izquierdo %}{{ logo_izquierdo }}{% else %}{% static 'img/logobc.jpg' %}{% endif %}"
+              alt="Logo izquierdo">
+          <div class="u-small u-mt-8">GOBIERNO DEL ESTADO DE BAJA CALIFORNIA</div>
         </div>
-        
-        <div style="float: right; width: 45%; text-align: center;">
-            <div class="signature-line"></div>
-            <p>Director(a) de la Institución</p>
+
+        <div class="col-right">
+          <div><strong>SECRETARÍA DE EDUCACIÓN</strong></div>
+          <div>SUBSECRETARÍA DE EDUCACIÓN MEDIA SUPERIOR, SUPERIOR E INVESTIGACIÓN</div>
+          <div>DIRECCIÓN DE EDUCACIÓN SUPERIOR PARA PROFESIONALES DE LA EDUCACIÓN</div>
+          <div><strong>BENEMÉRITA ESCUELA NORMAL URBANA NOCTURNA DEL ESTADO</strong></div>
+          <div><em>ING. JOSÉ G. VALENZUELA</em></div>
+        </div>
+      </div>
+
+  
+    </header>
+
+      <div class="brand-center">
+        {% if logo_central %}
+          <img src="{{ logo_central }}" alt="Marca BENUNE">
+        {% endif %}
+      </div>
+
+    <div class="motto">
+      “2025, Año del Turismo Sostenible como Impulsor del Bienestar Social y Progreso”
+    </div>
+
+    <section class="subject">
+      <span class="label">Asunto:</span>
+      <span class="value">CONSTANCIA DE ESTUDIOS</span>
+    </section>
+
+    <main>
+      <p class="title-to">A QUIEN CORRESPONDA:</p>
+
+      <p class="paragraph">
+        Quien suscribe {% if constancia.director_nombre %}<span class="strong">{{ constancia.director_nombre }}</span>{% else %}Dra. Liuba Abiyova Téllez Osuna{% endif %}
+        {% if constancia.director_cargo %}{{ constancia.director_cargo }}{% else %}Directora{% endif %} de la
+        <span class="strong">BENEMÉRITA ESCUELA NORMAL URBANA NOCTURNA DEL ESTADO. ING. JOSÉ G. VALENZUELA</span>,
+        con clave <span class="strong">02ENL0004Y</span>, hace constar que según documentos que se encuentran en los archivos
+        de esta Institución, la(el) C. <span class="strong sc">{{ constancia.alumno.nombre_completo }}</span>
+        con número de matrícula <span class="strong">{{ constancia.alumno.matricula }}</span> y CURP:
+        <span class="strong">{{ constancia.alumno.curp }}</span>, es alumna(o) regular y se encuentra inscrita(o)
+        en el <span class="strong">{{ constancia.alumno.semestre_actual }}°</span> semestre, turno
+        <span class="strong">{{ constancia.alumno.get_turno_display }}</span> de la
+        <span class="strong">{{ constancia.alumno.carrera.nombre|default:"Licenciatura" }}</span>
+        {% if constancia.alumno.plan %} plan de estudios <span class="strong">{{ constancia.alumno.plan }}</span>{% endif %}.
+      </p>
+
+
+<p class="paragraph">
+  Se otorga la presente constancia para los fines legales que a la parte interesada convengan
+  en la Ciudad de Mexicali, Baja California, México, a los
+  {# --- Caso 1: si es date/datetime, el filtro date funciona --- #}
+  {% if constancia.fecha_emision|date:"Y" != "" %}
+    <span class="strong">{{ constancia.fecha_emision|date:"d" }}</span> días del mes de
+    <span class="strong">{{ constancia.fecha_emision|date:"F" }}</span> del
+    <span class="strong">{{ constancia.fecha_emision|date:"Y" }}</span>.
+  {% else %}
+  {# --- Caso 2: si es string "YYYY-MM-DD", lo partimos --- #}
+    {% with fe=constancia.fecha_emision|stringformat:"s" %}
+      {% with y=fe|slice:":4" m=fe|slice:"5:7" d=fe|slice:"8:10" %}
+        <span class="strong">{{ d }}</span> días del mes de
+        <span class="strong">
+          {% if m == "01" %}Enero{% elif m == "02" %}Febrero{% elif m == "03" %}Marzo
+          {% elif m == "04" %}Abril{% elif m == "05" %}Mayo{% elif m == "06" %}Junio
+          {% elif m == "07" %}Julio{% elif m == "08" %}Agosto{% elif m == "09" %}Septiembre
+          {% elif m == "10" %}Octubre{% elif m == "11" %}Noviembre{% elif m == "12" %}Diciembre{% endif %}
+        </span> del
+        <span class="strong">{{ y }}</span>.
+      {% endwith %}
+    {% endwith %}
+  {% endif %}
+</p>  
+
+      <div class="attn">A T E N T A M E N T E</div>
+
+      <section class="signatures">
+        <div class="sig-col sig-left">
+          <div class="sig-line"></div>
+          <div class="sig-name">Vo.Bo. Subdirección Académica</div>
+          <div class="sig-role">BENUNE</div>
+        </div>
+        <div class="sig-col sig-right">
+          <div class="sig-line"></div>
+          <div class="sig-name">DRA. LIUBA ABIYOVA TÉLLEZ OSUNA</div>
+          <div class="sig-role">Directora de BENUNE</div>
         </div>
         <div style="clear: both;"></div>
-    </div>
-    
-    <div class="footer">
-        <p>AV. JUAN ESCUTIA Y RIO SAN LORENZO S/N COL. PRO-HOGAR, MEXICALI, B.C. C.P. 21260</p>
-        <p>TEL: (686) 552-XXXX</p>
-    </div>
-</body>
-</html>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>AV. JUAN ESCUTIA Y RÍO SAN LORENZO S/N, COL. PRO-HOGAR, MEXICALI, B.C., C.P. 21240</div>
+      <div>Tel. (686) 566 14 95</div>
+      <div><a href="mailto:benunedireccion@gmail.com">benunedireccion@gmail.com</a></div>
+    </footer>
+
+  </body>
+  </html>

@@ -10,6 +10,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from weasyprint import HTML
 import tempfile
+from django.templatetags.static import static
 
 @control_escolar_required
 def certificate_list(request):
@@ -40,15 +41,17 @@ def generate_certificate(request):
                 estado='generada'
             )
             
-            # Generar PDF
+            # Generar PDF, render con contexto que incluye URLS absolutas de las imageness
             html_string = render_to_string('constancias/certificate_template.html', {
-                'constancia': constancia
+                'constancia': constancia,
+                'logo_izquierdo': request.build_absolute_uri(static('img/logobc.jpg')),
+                'logo_central':   request.build_absolute_uri(static('img/logobn.jpg')), 
             })
             
             # Generar PDF con WeasyPrint
-            html = HTML(string=html_string)
+            html = HTML(string=html_string, base_url=request.build_absolute_uri('/'))
             pdf_content = html.write_pdf()
-            
+
             # Guardar el PDF
             pdf_filename = f'constancia_{constancia.id}_{alumno.matricula}.pdf'
             pdf_path = f'constancias/{pdf_filename}'

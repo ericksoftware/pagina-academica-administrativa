@@ -110,14 +110,23 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'benune_db',
-        'USER': 'postgres',           # Usuario por defecto
-        'PASSWORD': '1234',    # La password que estableciste
-        'HOST': 'localhost',
-        'PORT': '5432',
+
+'default': {
+
+'ENGINE': 'django.db.backends.postgresql',
+
+'NAME': 'benune_db',
+
+'USER': 'postgres',
+
+'PASSWORD': '1234',
+
+'HOST': 'localhost',
+
+'PORT': '5432',
+
     }
+
 }
 
 # Password validation

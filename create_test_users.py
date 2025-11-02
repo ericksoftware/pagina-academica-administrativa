@@ -1,120 +1,19 @@
 # create_test_users.py
 import os
-import django
 import sys
+import django
 
-# Agregar el directorio del proyecto al path
+# Path y settings
 project_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(project_dir)
-
-# Configurar Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
-from usuarios.models import Usuario
 from django.contrib.auth import get_user_model
+Usuario = get_user_model()
 
-def crear_usuarios_prueba():
-    """Crear usuarios de prueba para el sistema"""
-    
-    print("🔧 Creando usuarios de prueba...")
-    
-    # Datos de usuarios a crear
-    usuarios_data = [
-        {
-            'email': 'control@benune.edu.mx',
-            'password': 'Control123',
-            'first_name': 'María',
-            'last_name': 'García López',
-            'tipo_usuario': 'control_escolar',
-            'turno': 'matutino',
-            'telefono': '5551234567',
-            'is_staff': True,
-            'is_superuser': False
-        },
-        {
-            'email': 'directivo@benune.edu.mx',
-            'password': 'Directivo123',
-            'first_name': 'Carlos',
-            'last_name': 'Rodríguez Martínez',
-            'tipo_usuario': 'directivo',
-            'turno': 'matutino',
-            'telefono': '5557654321',
-            'is_staff': True,
-            'is_superuser': False
-        },
-        {
-            'email': 'docente@benune.edu.mx',
-            'password': 'Docente123',
-            'first_name': 'Ana',
-            'last_name': 'Hernández Silva',
-            'tipo_usuario': 'docente',
-            'turno': 'vespertino',
-            'telefono': '5559876543',
-            'is_staff': False,
-            'is_superuser': False
-        },
-        {
-            'email': 'admin@benune.edu.mx',
-            'password': 'Admin123',
-            'first_name': 'Super',
-            'last_name': 'Administrador',
-            'tipo_usuario': 'directivo',
-            'turno': 'matutino',
-            'telefono': '5550000000',
-            'is_staff': True,
-            'is_superuser': True
-        }
-    ]
-    
-    usuarios_creados = 0
-    usuarios_actualizados = 0
-    
-    for user_data in usuarios_data:
-        email = user_data['email']
-        password = user_data.pop('password')
-        
-        try:
-            # Verificar si el usuario ya existe
-            usuario, created = Usuario.objects.get_or_create(
-                email=email,
-                defaults=user_data
-            )
-            
-            if created:
-                # Si se creó nuevo, establecer la contraseña
-                usuario.set_password(password)
-                usuario.save()
-                usuarios_creados += 1
-                print(f"✅ CREADO: {email} - {usuario.get_tipo_usuario_display()}")
-            else:
-                # Si ya existía, actualizar datos y contraseña
-                for key, value in user_data.items():
-                    setattr(usuario, key, value)
-                usuario.set_password(password)
-                usuario.save()
-                usuarios_actualizados += 1
-                print(f"🔄 ACTUALIZADO: {email} - {usuario.get_tipo_usuario_display()}")
-                
-        except Exception as e:
-            print(f"❌ ERROR al crear {email}: {str(e)}")
-    
-    print(f"\n📊 Resumen:")
-    print(f"   Usuarios creados: {usuarios_creados}")
-    print(f"   Usuarios actualizados: {usuarios_actualizados}")
-    print(f"   Total en sistema: {Usuario.objects.count()}")
-    
-    # Mostrar lista de usuarios creados
-    print(f"\n👥 Lista de usuarios disponibles:")
-    for usuario in Usuario.objects.all():
-        print(f"   • {usuario.email} - {usuario.get_tipo_usuario_display()} - {usuario.get_full_name()}")
-
-def crear_usuario_control_escolar():
-    """Función específica para crear solo un usuario de control escolar"""
-    
-    print("🔧 Creando usuario de Control Escolar...")
-    
-    user_data = {
+USUARIOS_DATA = [
+    {
         'email': 'control@benune.edu.mx',
         'password': 'Control123',
         'first_name': 'María',
@@ -123,59 +22,134 @@ def crear_usuario_control_escolar():
         'turno': 'matutino',
         'telefono': '5551234567',
         'is_staff': True,
-        'is_superuser': False
-    }
-    
-    email = user_data['email']
-    password = user_data.pop('password')
-    
-    try:
-        usuario, created = Usuario.objects.get_or_create(
-            email=email,
-            defaults=user_data
+        'is_superuser': False,
+    },
+    {
+        'email': 'directivo@benune.edu.mx',
+        'password': 'Directivo123',
+        'first_name': 'Carlos',
+        'last_name': 'Rodríguez Martínez',
+        'tipo_usuario': 'directivo',
+        'turno': 'matutino',
+        'telefono': '5557654321',
+        'is_staff': True,
+        'is_superuser': False,
+    },
+    {
+        'email': 'docente@benune.edu.mx',
+        'password': 'Docente123',
+        'first_name': 'Ana',
+        'last_name': 'Hernández Silva',
+        'tipo_usuario': 'docente',
+        'turno': 'vespertino',
+        'telefono': '5559876543',
+        'is_staff': False,
+        'is_superuser': False,
+    },
+    {
+        'email': 'admin@benune.edu.mx',
+        'password': 'Admin123',
+        'first_name': 'Super',
+        'last_name': 'Administrador',
+        'tipo_usuario': 'directivo',
+        'turno': 'matutino',
+        'telefono': '5550000000',
+        'is_staff': True,
+        'is_superuser': True,
+    },
+]
+
+def ensure_user(email: str, password: str, **data):
+    """
+    Crea o actualiza un usuario de forma segura.
+    - Detecta existencia por username (no cifrado).
+    - Si existe: actualiza campos y contraseña.
+    - Si no existe: crea con create_user() / create_superuser().
+    """
+    Usuario = get_user_model()
+    username = email.split('@')[0]
+    data.setdefault('username', username)
+
+    # 🔎 Buscar por username (único y NO cifrado)
+    usuario = Usuario.objects.filter(username=username).first()
+
+    if usuario:
+        # Actualizar existente
+        for k, v in data.items():
+            if k != 'username':  # mantener username
+                setattr(usuario, k, v)
+        usuario.email = email.lower()
+        usuario.set_password(password)
+        usuario.save()
+        return usuario, False
+
+    # Crear nuevo
+    extra = {k: v for k, v in data.items() if k != 'username'}
+    if data.get('is_superuser') and data.get('is_staff'):
+        usuario = Usuario.objects.create_superuser(
+            username, email=email.lower(), password=password, **extra
         )
-        
+    else:
+        usuario = Usuario.objects.create_user(
+            username, email=email.lower(), password=password, **extra
+        )
+    return usuario, True
+
+
+
+def crear_usuario_control_escolar():
+    base = {
+        'email': 'control@benune.edu.mx',
+        'password': 'Control123',
+        'first_name': 'María',
+        'last_name': 'García López',
+        'tipo_usuario': 'control_escolar',
+        'turno': 'matutino',
+        'telefono': '5551234567',
+        'is_staff': True,
+        'is_superuser': False,
+    }
+    email = base.pop('email')
+    pwd = base.pop('password')
+    usuario, created = ensure_user(email, pwd, **base)
+    print("✅ USUARIO CONTROL ESCOLAR CREADO:" if created else "🔄 USUARIO CONTROL ESCOLAR ACTUALIZADO:")
+    print(f"   📧 {usuario.email} | 🔑 {pwd} | 👤 {usuario.get_full_name()} | 🏢 {usuario.get_tipo_usuario_display()}")
+
+
+def crear_usuarios_prueba():
+    print("🔧 Creando usuarios de prueba...")
+    creados = 0
+    actualizados = 0
+    for item in USUARIOS_DATA:
+        data = item.copy()
+        email = data.pop('email')
+        pwd = data.pop('password')  
+        usuario, created = ensure_user(email, pwd, **data)
         if created:
-            usuario.set_password(password)
-            usuario.save()
-            print(f"✅ USUARIO CONTROL ESCOLAR CREADO:")
+            creados += 1
+            print(f"✅ CREADO: {email} - {usuario.get_tipo_usuario_display()}")
         else:
-            for key, value in user_data.items():
-                setattr(usuario, key, value)
-            usuario.set_password(password)
-            usuario.save()
-            print(f"🔄 USUARIO CONTROL ESCOLAR ACTUALIZADO:")
-        
-        print(f"   📧 Email: {usuario.email}")
-        print(f"   🔑 Contraseña: {password}")
-        print(f"   👤 Nombre: {usuario.get_full_name()}")
-        print(f"   🏢 Tipo: {usuario.get_tipo_usuario_display()}")
-        print(f"   ⏰ Turno: {usuario.get_turno_display()}")
-        print(f"   📞 Teléfono: {usuario.telefono}")
-        
-    except Exception as e:
-        print(f"❌ ERROR al crear usuario control escolar: {str(e)}")
+            actualizados += 1
+            print(f"🔄 ACTUALIZADO: {email} - {usuario.get_tipo_usuario_display()}")
+
+    total = Usuario.objects.count()
+    print(f"\n📊 Resumen:\n   Usuarios creados: {creados}\n   Usuarios actualizados: {actualizados}\n   Total en sistema: {total}")
+    print("\n👥 Lista de usuarios:")
+    for u in Usuario.objects.all():
+        print(f"   • {u.email} - {u.get_tipo_usuario_display()} - {u.get_full_name()}")
 
 if __name__ == '__main__':
     print("🚀 INICIANDO CREACIÓN DE USUARIOS DE PRUEBA")
     print("=" * 50)
-    
-    # Crear solo el usuario de control escolar
     crear_usuario_control_escolar()
-    
     print("\n" + "=" * 50)
     print("¿Deseas crear todos los usuarios de prueba?")
-    respuesta = input("(s/n): ").lower().strip()
-    
-    if respuesta == 's':
-        print("\n")
+    if input("(s/n): ").strip().lower() == 's':
+        print()
         crear_usuarios_prueba()
-    
     print("\n🎉 Proceso completado!")
     print("\n💡 Credenciales de acceso:")
     print("   Control Escolar: control@benune.edu.mx / Control123")
-    print("   Directivo: directivo@benune.edu.mx / Directivo123") 
-    print("   Docente: docente@benune.edu.mx / Docente123")
-    print("   Admin: admin@benune.edu.mx / Admin123")
-
-    # http://127.0.0.1:8000/constancias/
+    print("   Directivo:      directivo@benune.edu.mx / Directivo123")
+    print("   Docente:        docente@benune.edu.mx / Docente123")
+    print("   Admin:          admin@benune.edu.mx / Admin123")

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Actas de Evaluación - BENUNE{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h2 text-primary-custom">Actas de Evaluación</h1>
+            <p class="lead">Lista de actas de evaluación generadas</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{% url 'generate_acta' %}" class="btn btn-primary-custom">
+                    <i class="fas fa-plus me-2"></i>Generar Nueva Acta
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Materia</th>
+                            <th>Carrera</th>
+                            <th>Semestre</th>
+                            <th>Grupo</th>
+                            <th>Periodo</th>
+                            <th>Fecha de Generación</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for acta in actas %}
+                        <tr>
+                            <td>{{ acta.materia.nombre }}</td>
+                            <td>{{ acta.carrera.nombre }}</td>
+                            <td>{{ acta.semestre }}</td>
+                            <td>{{ acta.grupo }}</td>
+                            <td>{{ acta.periodo }}</td>
+                            <td>{{ acta.fecha_generacion|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <span class="badge bg-{% if acta.estado == 'generada' %}success{% else %}warning{% endif %}">
+                                    {{ acta.get_estado_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'view_acta' acta.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye me-1"></i>Ver
+                                </a>
+                                <a href="{% url 'download_acta' acta.id %}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-download me-1"></i>Descargar
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center">No hay actas generadas</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

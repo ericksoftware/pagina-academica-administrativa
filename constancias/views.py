@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 from weasyprint import HTML
 import tempfile
 from django.templatetags.static import static
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 @control_escolar_required
 def certificate_list(request):
@@ -81,7 +82,7 @@ def generate_certificate(request):
 
 @control_escolar_required
 def view_certificate(request, certificate_id):
-    """Ver una constancia específica"""
+    """Ver una constancia específica - Muestra el PDF directamente"""
     constancia = get_object_or_404(Constancia, id=certificate_id)
     
     context = {
@@ -111,3 +112,22 @@ def download_certificate(request, certificate_id):
     else:
         messages.error(request, 'El archivo PDF no está disponible')
         return redirect('view_certificate', certificate_id=certificate_id)
+
+@xframe_options_exempt
+@control_escolar_required
+def view_pdf(request, certificate_id):
+    """Vista especial para mostrar PDF en iframe"""
+    constancia = get_object_or_404(Constancia, id=certificate_id)
+    
+    if constancia.archivo_pdf and constancia.archivo_pdf.name:
+        try:
+            response = FileResponse(
+                constancia.archivo_pdf.open(),
+                content_type='application/pdf'
+            )
+            response['Content-Disposition'] = f'inline; filename="constancia_{constancia.alumno.matricula}.pdf"'
+            return response
+        except Exception as e:
+            return HttpResponse("Error al cargar el PDF", status=500)
+    else:
+        return HttpResponse("PDF no disponible", status=404)

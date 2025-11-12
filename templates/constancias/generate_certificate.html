@@ -27,17 +27,41 @@
                 
                 <div class="row mb-4">
                     <div class="col-md-6">
+                        <!-- Campo de búsqueda -->
+                        <div class="mb-3">
+                            <label for="alumnoSearch" class="form-label">Buscar Alumno</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="alumnoSearch" 
+                                       placeholder="Escribe nombre, apellido o matrícula...">
+                            </div>
+                            <div class="form-text">Busca por nombre, apellidos o matrícula</div>
+                        </div>
+
                         <div class="mb-3">
                             <label for="alumno" class="form-label">Seleccionar Alumno *</label>
-                            <select class="form-select" id="alumno" name="alumno" required>
-                                <option value="">-- Seleccione un alumno --</option>
+                            <select class="form-select" id="alumno" name="alumno" required size="8" style="min-height: 200px;">
+                                <!-- <option value="">-- Seleccione un alumno --</option> -->
                                 {% for alumno in alumnos %}
-                                <option value="{{ alumno.id }}">
+                                <option value="{{ alumno.id }}" 
+                                        data-nombre="{{ alumno.nombre_completo|lower }}"
+                                        data-matricula="{{ alumno.matricula|lower }}"
+                                        data-texto="{{ alumno.nombre_completo }} - {{ alumno.matricula }}">
                                     {{ alumno.nombre_completo }} - {{ alumno.matricula }}
+                                    {% if alumno.carrera %}
+                                     - {{ alumno.carrera.nombre }}
+                                    {% endif %}
+                                    {% if alumno.semestre_actual %}
+                                     - {{ alumno.semestre_actual }}° Semestre
+                                    {% endif %}
                                 </option>
                                 {% endfor %}
                             </select>
-                            <div class="form-text">Seleccione el alumno para generar la constancia</div>
+                            <div class="form-text">
+                                <span id="resultCount">{{ alumnos.count }}</span> alumnos encontrados
+                            </div>
                         </div>
                     </div>
                     
@@ -47,6 +71,32 @@
                             <input type="date" class="form-control" id="fecha_emision" name="fecha_emision" 
                                    value="{% now 'Y-m-d' %}" required>
                             <div class="form-text">Fecha en que se emite la constancia</div>
+                        </div>
+
+                        <!-- Información del alumno seleccionado -->
+                        <div class="card mt-4" id="alumnoInfo" style="display: none;">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0"><i class="fas fa-user me-2"></i>Información del Alumno</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row small">
+                                    <div class="col-12 mb-2">
+                                        <strong>Nombre:</strong> <span id="infoNombre"></span>
+                                    </div>
+                                    <div class="col-12 mb-2">
+                                        <strong>Matrícula:</strong> <span id="infoMatricula"></span>
+                                    </div>
+                                    <div class="col-12 mb-2">
+                                        <strong>Carrera:</strong> <span id="infoCarrera"></span>
+                                    </div>
+                                    <div class="col-12 mb-2">
+                                        <strong>Semestre:</strong> <span id="infoSemestre"></span>
+                                    </div>
+                                    <div class="col-12">
+                                        <strong>CURP:</strong> <span id="infoCurp"></span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -97,43 +147,133 @@
 .card-body {
     padding: 2rem;
 }
+
+#alumnoInfo {
+    border-left: 4px solid var(--color-primary);
+}
+
+.highlight {
+    background-color: #fff3cd !important;
+    font-weight: bold;
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Mejorar la experiencia del usuario
     const alumnoSelect = document.getElementById('alumno');
-    const fechaInput = document.getElementById('fecha_emision');
+    const alumnoSearch = document.getElementById('alumnoSearch');
+    const resultCount = document.getElementById('resultCount');
+    const alumnoInfo = document.getElementById('alumnoInfo');
     
-    // Agregar búsqueda en tiempo real si hay muchos alumnos
-    if (alumnoSelect) {
-        const originalOptions = Array.from(alumnoSelect.options);
+    // Información de alumnos (podríamos cargarla via AJAX si hay muchos)
+    const alumnosData = {
+        {% for alumno in alumnos %}
+        '{{ alumno.id }}': {
+            nombre: '{{ alumno.nombre_completo }}',
+            matricula: '{{ alumno.matricula }}',
+            carrera: '{{ alumno.carrera.nombre|default:"No asignada" }}',
+            semestre: '{{ alumno.semestre_actual|default:"N/A" }}',
+            curp: '{{ alumno.curp|default:"N/A" }}'
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+
+    // Función para filtrar alumnos
+    function filtrarAlumnos(termino) {
+        const options = alumnoSelect.querySelectorAll('option');
+        let visibleCount = 0;
+        const terminoLower = termino.toLowerCase();
         
-        // Crear funcionalidad de búsqueda si hay más de 10 alumnos
-        if (originalOptions.length > 10) {
-            const searchContainer = document.createElement('div');
-            searchContainer.className = 'mb-2';
-            searchContainer.innerHTML = `
-                <input type="text" class="form-control" id="alumnoSearch" placeholder="Buscar alumno...">
-            `;
-            alumnoSelect.parentNode.insertBefore(searchContainer, alumnoSelect);
+        options.forEach(option => {
+            if (option.value === '') {
+                option.style.display = termino ? 'none' : 'block';
+                if (!termino) visibleCount++;
+                return;
+            }
             
-            const searchInput = document.getElementById('alumnoSearch');
-            searchInput.addEventListener('input', function(e) {
-                const searchTerm = e.target.value.toLowerCase();
-                
-                // Limpiar select
-                alumnoSelect.innerHTML = '<option value="">-- Seleccione un alumno --</option>';
-                
-                // Filtrar opciones
-                originalOptions.forEach(option => {
-                    if (option.value && option.text.toLowerCase().includes(searchTerm)) {
-                        alumnoSelect.appendChild(option.cloneNode(true));
-                    }
-                });
-            });
+            const texto = option.getAttribute('data-texto').toLowerCase();
+            const nombre = option.getAttribute('data-nombre');
+            const matricula = option.getAttribute('data-matricula');
+            
+            const coincide = texto.includes(terminoLower) || 
+                           nombre.includes(terminoLower) || 
+                           matricula.includes(terminoLower);
+            
+            option.style.display = coincide ? 'block' : 'none';
+            
+            if (coincide) {
+                visibleCount++;
+                // Resaltar el término de búsqueda en el texto
+                if (termino) {
+                    const regex = new RegExp(`(${termino})`, 'gi');
+                    const textoOriginal = option.textContent;
+                    option.innerHTML = textoOriginal.replace(regex, '<span class="highlight">$1</span>');
+                } else {
+                    option.innerHTML = option.getAttribute('data-texto');
+                }
+            }
+        });
+        
+        resultCount.textContent = visibleCount - 1; // Restamos la opción vacía
+        
+        // Si solo hay un resultado después de filtrar, seleccionarlo automáticamente
+        if (visibleCount === 2 && termino) { // 2 porque cuenta la opción vacía
+            const unicaOpcion = alumnoSelect.querySelector('option[style="display: block;"]:not([value=""])');
+            if (unicaOpcion) {
+                alumnoSelect.value = unicaOpcion.value;
+                mostrarInfoAlumno(unicaOpcion.value);
+            }
         }
     }
+
+    // Función para mostrar información del alumno seleccionado
+    function mostrarInfoAlumno(alumnoId) {
+        const info = alumnosData[alumnoId];
+        if (info) {
+            document.getElementById('infoNombre').textContent = info.nombre;
+            document.getElementById('infoMatricula').textContent = info.matricula;
+            document.getElementById('infoCarrera').textContent = info.carrera;
+            document.getElementById('infoSemestre').textContent = info.semestre + (info.semestre !== 'N/A' ? '° Semestre' : '');
+            document.getElementById('infoCurp').textContent = info.curp;
+            alumnoInfo.style.display = 'block';
+        } else {
+            alumnoInfo.style.display = 'none';
+        }
+    }
+
+    // Evento de búsqueda en tiempo real
+    alumnoSearch.addEventListener('input', function(e) {
+        filtrarAlumnos(e.target.value.trim());
+    });
+
+    // Evento cuando se selecciona un alumno
+    alumnoSelect.addEventListener('change', function(e) {
+        if (e.target.value) {
+            mostrarInfoAlumno(e.target.value);
+        } else {
+            alumnoInfo.style.display = 'none';
+        }
+    });
+
+    // Limpiar búsqueda cuando se cambia la selección manualmente
+    alumnoSelect.addEventListener('focus', function() {
+        alumnoSearch.focus();
+    });
+
+    // Tecla Enter en la búsqueda selecciona el primer resultado
+    alumnoSearch.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const primeraOpcion = alumnoSelect.querySelector('option[style="display: block;"]:not([value=""])');
+            if (primeraOpcion) {
+                alumnoSelect.value = primeraOpcion.value;
+                mostrarInfoAlumno(primeraOpcion.value);
+            }
+        }
+    });
+
+    // Inicializar contador
+    resultCount.textContent = {{ alumnos.count }};
 });
 </script>
 {% endblock %}

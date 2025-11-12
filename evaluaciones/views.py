@@ -2,7 +2,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, FileResponse  
 from core.decorators import control_escolar_required
 from .models import Calificacion, Materia, ActaEvaluacion, Carrera, Unidad
 from alumnos.models import Alumno
@@ -12,6 +12,8 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from weasyprint import HTML
 from django.db import models
+from django.views.decorators.clickjacking import xframe_options_exempt
+from django.templatetags.static import static
 
 @control_escolar_required
 def grade_list(request):
@@ -548,3 +550,178 @@ def asignar_materias_unidades_sin_asignar(request, carrera_id):
         messages.error(request, f'Error al asignar materias: {str(e)}')
     
     return redirect('detalle_carrera', carrera_id=carrera_id)
+
+@control_escolar_required
+def acta_list(request):
+    """Lista de todas las actas de evaluación - Similar a certificate_list"""
+    actas = ActaEvaluacion.objects.all().order_by('-fecha_generacion')
+    
+    context = {
+        'actas': actas,
+        'page_title': 'Lista de Actas de Evaluación'
+    }
+    return render(request, 'evaluaciones/acta_list.html', context)
+
+@control_escolar_required
+def generate_acta(request):
+    """Generar una nueva acta de evaluación"""
+    carreras = Carrera.objects.all()
+    
+    if request.method == 'POST':
+        try:
+            carrera_id = request.POST.get('carrera')
+            semestre = request.POST.get('semestre')
+            grupo = request.POST.get('grupo')
+            turno = request.POST.get('turno')
+            materia_id = request.POST.get('materia')
+            ciclo_escolar = request.POST.get('ciclo_escolar')
+            total_horas = request.POST.get('total_horas')
+            fecha_emision = request.POST.get('fecha_emision')
+            
+            carrera = Carrera.objects.get(id=carrera_id)
+            materia = Materia.objects.get(id=materia_id)
+            
+            # Crear el acta
+            acta = ActaEvaluacion.objects.create(
+                carrera=carrera,
+                semestre=semestre,
+                grupo=grupo,
+                materia=materia,
+                periodo=ciclo_escolar,
+                fecha_emision=fecha_emision,
+                estado='generada',
+                generada_por=request.user
+            )
+            
+            # Obtener calificaciones para este acta
+            calificaciones = Calificacion.objects.filter(
+                alumno__carrera=carrera,
+                alumno__semestre_actual=semestre,
+                unidad__materias=materia,
+                periodo=ciclo_escolar
+            ).select_related('alumno', 'unidad')
+            
+            # Obtener unidades de la materia
+            unidades = Unidad.objects.filter(materias=materia).order_by('numero')
+            
+            # Calcular estadísticas
+            acta.total_alumnos = calificaciones.values('alumno').distinct().count()
+            acta.alumnos_evaluados = calificaciones.exclude(calificacion__isnull=True).count()
+            
+            if calificaciones.exists():
+                calificaciones_validas = calificaciones.exclude(calificacion__isnull=True)
+                if calificaciones_validas.exists():
+                    total_calificaciones = sum(calif.calificacion for calif in calificaciones_validas)
+                    acta.promedio_grupo = total_calificaciones / calificaciones_validas.count()
+            
+            acta.save()
+            
+            # Generar PDF
+            html_string = render_to_string('evaluaciones/acta_template.html', {
+                'acta': acta,
+                'calificaciones': calificaciones,
+                'unidades': unidades,
+                'turno': turno,
+                'ciclo_escolar': ciclo_escolar,
+                'total_horas': total_horas,
+                'logo_izquierdo': request.build_absolute_uri(static('img/logobc.jpg')),
+                'logo_central': request.build_absolute_uri(static('img/logobn.jpg')),
+            })
+            
+            html = HTML(string=html_string, base_url=request.build_absolute_uri('/'))
+            pdf_content = html.write_pdf()
+
+            pdf_filename = f'acta_{acta.id}_{materia.nombre.replace(" ", "_")}_{grupo}.pdf'
+            pdf_path = f'actas/{pdf_filename}'
+            full_path = os.path.join(settings.MEDIA_ROOT, pdf_path)
+            
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+            with open(full_path, 'wb') as f:
+                f.write(pdf_content)
+            
+            acta.archivo_pdf.name = pdf_path
+            acta.save()
+            
+            messages.success(request, f'Acta de evaluación generada exitosamente para {materia.nombre}')
+            return redirect('view_acta', acta_id=acta.id)
+            
+        except Exception as e:
+            messages.error(request, f'Error al generar el acta: {str(e)}')
+    
+    # Si es GET, mostrar el formulario
+    context = {
+        'carreras': carreras,
+        'page_title': 'Generar Acta de Evaluación'
+    }
+    return render(request, 'evaluaciones/generate_acta.html', context)
+
+@control_escolar_required
+def view_acta(request, acta_id):
+    """Ver una acta específica - Similar a view_certificate"""
+    acta = get_object_or_404(ActaEvaluacion, id=acta_id)
+    
+    context = {
+        'acta': acta,
+        'page_title': f'Acta de {acta.materia.nombre}'
+    }
+    return render(request, 'evaluaciones/view_acta.html', context)
+
+@control_escolar_required
+def download_acta(request, acta_id):
+    """Descargar una acta en PDF - Similar a download_certificate"""
+    acta = get_object_or_404(ActaEvaluacion, id=acta_id)
+    
+    if acta.archivo_pdf and acta.archivo_pdf.name:
+        try:
+            response = FileResponse(
+                acta.archivo_pdf.open(),
+                as_attachment=True,
+                filename=f'acta_{acta.materia.nombre.replace(" ", "_")}_{acta.grupo}.pdf'
+            )
+            response['Content-Type'] = 'application/pdf'
+            return response
+        except Exception as e:
+            messages.error(request, f'Error al descargar el archivo: {str(e)}')
+            return redirect('view_acta', acta_id=acta_id)
+    else:
+        messages.error(request, 'El archivo PDF no está disponible')
+        return redirect('view_acta', acta_id=acta_id)
+
+@xframe_options_exempt
+@control_escolar_required
+def view_acta_pdf(request, acta_id):
+    """Vista especial para mostrar PDF en iframe - Similar a view_pdf"""
+    acta = get_object_or_404(ActaEvaluacion, id=acta_id)
+    
+    if acta.archivo_pdf and acta.archivo_pdf.name:
+        try:
+            response = FileResponse(
+                acta.archivo_pdf.open(),
+                content_type='application/pdf'
+            )
+            response['Content-Disposition'] = f'inline; filename="acta_{acta.materia.nombre.replace(" ", "_")}_{acta.grupo}.pdf"'
+            return response
+        except Exception as e:
+            return HttpResponse("Error al cargar el PDF", status=500)
+    else:
+        return HttpResponse("PDF no disponible", status=404)
+    
+@control_escolar_required
+def obtener_materias_por_carrera(request, carrera_id):
+    """Obtener materias de una carrera específica (AJAX)"""
+    try:
+        carrera = get_object_or_404(Carrera, id=carrera_id)
+        materias = Materia.objects.filter(carrera=carrera, activa=True).order_by('nombre')
+        
+        materias_data = []
+        for materia in materias:
+            materias_data.append({
+                'id': materia.id,
+                'nombre': materia.nombre,
+                'semestre': materia.semestre,
+                'codigo': materia.unidades.first().codigo if materia.unidades.exists() else 'N/A'
+            })
+        
+        return JsonResponse({'materias': materias_data})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

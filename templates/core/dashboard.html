@@ -92,7 +92,7 @@
         <!-- Módulo de Actas de Evaluación -->
         <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2">
             {% if user.tipo_usuario == 'control_escolar' %}
-            <a href="{% url 'grade_list' %}" class="card-module-link">
+            <a href="{% url 'acta_list' %}" class="card-module-link">  <!-- CAMBIAR grade_list por acta_list -->
             {% endif %}
                 <div class="card card-module h-100 text-center border-0 {% if user.tipo_usuario != 'control_escolar' %}module-disabled{% endif %}">
                     <div class="card-header bg-info text-white py-4 position-relative">

@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Generar Acta - BENUNE{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h2 text-primary-custom">Generar Acta de Evaluación</h1>
+            <p class="lead">Complete los datos para generar un acta de evaluación</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" id="actaForm">
+                {% csrf_token %}
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h4 class="text-primary-custom mb-3">Información Académica</h4>
+                        
+                        <div class="mb-3">
+                            <label for="carrera" class="form-label">Carrera *</label>
+                            <select class="form-select" id="carrera" name="carrera" required>
+                                <option value="">-- Seleccione carrera --</option>
+                                {% for carrera in carreras %}
+                                <option value="{{ carrera.id }}">{{ carrera.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="semestre" class="form-label">Semestre *</label>
+                            <input type="number" class="form-control" id="semestre" name="semestre" 
+                                   min="1" max="12" placeholder="Ej: 4" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="grupo" class="form-label">Grupo *</label>
+                            <input type="text" class="form-control" id="grupo" name="grupo" 
+                                   placeholder="Ej: M" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="turno" class="form-label">Turno *</label>
+                            <select class="form-select" id="turno" name="turno" required>
+                                <option value="">-- Seleccione turno --</option>
+                                <option value="matutino">Matutino</option>
+                                <option value="vespertino">Vespertino</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h4 class="text-primary-custom mb-3">Materia y Periodo</h4>
+                        
+                        <div class="mb-3">
+                            <label for="materia" class="form-label">Materia *</label>
+                            <select class="form-select" id="materia" name="materia" required disabled>
+                                <option value="">-- Primero seleccione una carrera --</option>
+                            </select>
+                            <div class="form-text" id="materiaHelp">
+                                Las materias se cargarán automáticamente al seleccionar una carrera
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="ciclo_escolar" class="form-label">Ciclo Escolar *</label>
+                            <input type="text" class="form-control" id="ciclo_escolar" name="ciclo_escolar" 
+                                   placeholder="Ej: 2024-2025" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="total_horas" class="form-label">Total de Horas *</label>
+                            <input type="number" class="form-control" id="total_horas" name="total_horas" 
+                                   placeholder="Ej: 72" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="fecha_emision" class="form-label">Fecha de Emisión *</label>
+                            <input type="date" class="form-control" id="fecha_emision" name="fecha_emision" 
+                                   value="{% now 'Y-m-d' %}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Información que se obtendrá automáticamente:</strong><br>
+                    - Nombre del docente (usuario actual)<br>
+                    - Lista de alumnos con sus calificaciones<br>
+                    - Código de la materia<br>
+                    - Valor mínimo y máximo aceptado
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'acta_list' %}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary-custom">
+                                <i class="fas fa-file-pdf me-2"></i>Generar Acta
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const carreraSelect = document.getElementById('carrera');
+    const materiaSelect = document.getElementById('materia');
+    const materiaHelp = document.getElementById('materiaHelp');
+    
+    // Función para cargar materias por carrera
+    function cargarMaterias(carreraId) {
+        if (!carreraId) {
+            materiaSelect.innerHTML = '<option value="">-- Primero seleccione una carrera --</option>';
+            materiaSelect.disabled = true;
+            materiaHelp.textContent = 'Las materias se cargarán automáticamente al seleccionar una carrera';
+            return;
+        }
+        
+        // Mostrar loading
+        materiaSelect.innerHTML = '<option value="">Cargando materias...</option>';
+        materiaSelect.disabled = true;
+        materiaHelp.textContent = 'Cargando materias...';
+        
+        // Hacer petición AJAX
+        fetch(`/evaluaciones/carreras/${carreraId}/materias/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    materiaSelect.innerHTML = '<option value="">Error al cargar materias</option>';
+                    materiaHelp.textContent = 'Error: ' + data.error;
+                    return;
+                }
+                
+                if (data.materias.length === 0) {
+                    materiaSelect.innerHTML = '<option value="">No hay materias disponibles para esta carrera</option>';
+                    materiaHelp.textContent = 'No se encontraron materias para esta carrera';
+                    return;
+                }
+                
+                // Llenar el select con las materias
+                materiaSelect.innerHTML = '<option value="">-- Seleccione materia --</option>';
+                data.materias.forEach(materia => {
+                    const option = document.createElement('option');
+                    option.value = materia.id;
+                    option.textContent = `${materia.nombre} (Semestre ${materia.semestre})`;
+                    if (materia.codigo && materia.codigo !== 'N/A') {
+                        option.textContent += ` - ${materia.codigo}`;
+                    }
+                    materiaSelect.appendChild(option);
+                });
+                
+                materiaSelect.disabled = false;
+                materiaHelp.textContent = `Se encontraron ${data.materias.length} materias para esta carrera`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                materiaSelect.innerHTML = '<option value="">Error al cargar materias</option>';
+                materiaHelp.textContent = 'Error de conexión al cargar las materias';
+            });
+    }
+    
+    // Event listener para cambio de carrera
+    carreraSelect.addEventListener('change', function() {
+        cargarMaterias(this.value);
+    });
+    
+    // Inicializar estado del select de materias
+    cargarMaterias(carreraSelect.value);
+});
+</script>
+{% endblock %}

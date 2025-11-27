@@ -7,18 +7,86 @@
 <div class="container py-4">
     <div class="row mb-4">
         <div class="col-12">
-            <h1 class="h2 text-primary-custom">Gestión de Constancias</h1>
-            <p class="lead">Genera y gestiona constancias de estudios</p>
-        </div>
-    </div>
-
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 text-primary-custom">Gestión de Constancias</h1>
+                    <p class="lead">
+                        Mostrando {{ constancias.start_index }} - {{ constancias.end_index }} de {{ constancias.paginator.count }} constancias
+                        {% if search_query %}para "{{ search_query }}"{% endif %}
+                    </p>
+                </div>
                 <a href="{% url 'generate_certificate' %}" class="btn btn-primary-custom">
                     <i class="fas fa-plus me-2"></i>Generar Nueva Constancia
                 </a>
             </div>
+        </div>
+    </div>
+
+    <!-- Barra de búsqueda y filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <!-- Barra de búsqueda -->
+                <div class="col-md-4">
+                    <label for="search" class="form-label">Buscar Constancia</label>
+                    <div class="input-group">
+                        <input type="text" 
+                               name="search" 
+                               id="search" 
+                               class="form-control" 
+                               placeholder="Alumno, matrícula..."
+                               value="{{ search_query }}">
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        {% if search_query %}
+                        <a href="{% url 'certificate_list' %}{% if tipo_filter or estado_filter %}?{% if tipo_filter %}tipo={{ tipo_filter }}{% endif %}{% if estado_filter %}{% if tipo_filter %}&{% endif %}estado={{ estado_filter }}{% endif %}{% endif %}" 
+                           class="btn btn-outline-danger" type="button">
+                            <i class="fas fa-times"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="tipo" class="form-label">Filtrar por Tipo:</label>
+                    <select name="tipo" id="tipo" class="form-select">
+                        <option value="">Todos los tipos</option>
+                        <option value="estudios" {% if tipo_filter == 'estudios' %}selected{% endif %}>Estudios</option>
+                        <option value="terminacion" {% if tipo_filter == 'terminacion' %}selected{% endif %}>Terminación</option>
+                        <option value="otros" {% if tipo_filter == 'otros' %}selected{% endif %}>Otros</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="estado" class="form-label">Filtrar por Estado:</label>
+                    <select name="estado" id="estado" class="form-select">
+                        <option value="">Todos los estados</option>
+                        <option value="generada" {% if estado_filter == 'generada' %}selected{% endif %}>Generada</option>
+                        <option value="revisada" {% if estado_filter == 'revisada' %}selected{% endif %}>Revisada</option>
+                        <option value="aprobada" {% if estado_filter == 'aprobada' %}selected{% endif %}>Aprobada</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-secondary-custom me-2 w-100">
+                        <i class="fas fa-filter me-2"></i>Filtrar
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Links rápidos para limpiar filtros -->
+            {% if search_query or tipo_filter or estado_filter %}
+            <div class="mt-3">
+                <small class="text-muted">
+                    Filtros activos: 
+                    {% if search_query %}<span class="badge bg-primary">Búsqueda: "{{ search_query }}"</span>{% endif %}
+                    {% if tipo_filter %}<span class="badge bg-info">Tipo: {{ tipo_filter }}</span>{% endif %}
+                    {% if estado_filter %}<span class="badge bg-success">Estado: {{ estado_filter }}</span>{% endif %}
+                    <a href="{% url 'certificate_list' %}" class="text-danger ms-2">
+                        <i class="fas fa-times me-1"></i>Limpiar todos
+                    </a>
+                </small>
+            </div>
+            {% endif %}
         </div>
     </div>
 
@@ -34,6 +102,7 @@
                             <th>Fecha Generación</th>
                             <th>Tipo</th>
                             <th>Estado</th>
+                            <th>Costo</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -50,6 +119,9 @@
                                 <span class="badge {% if constancia.estado == 'generada' %}bg-success{% elif constancia.estado == 'revisada' %}bg-warning{% else %}bg-secondary{% endif %}">
                                     {{ constancia.get_estado_display }}
                                 </span>
+                            </td>
+                            <td>
+                                <span class="fw-bold">${{ constancia.costo }}</span>
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm">
@@ -72,17 +144,116 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Paginación -->
+            {% if constancias.has_other_pages %}
+            <nav aria-label="Paginación de constancias" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if constancias.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if tipo_filter %}&tipo={{ tipo_filter }}{% endif %}{% if estado_filter %}&estado={{ estado_filter }}{% endif %}" aria-label="Primera">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ constancias.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if tipo_filter %}&tipo={{ tipo_filter }}{% endif %}{% if estado_filter %}&estado={{ estado_filter }}{% endif %}" aria-label="Anterior">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">&laquo;&laquo;</span>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">&laquo;</span>
+                    </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">
+                            Página {{ constancias.number }} de {{ constancias.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if constancias.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ constancias.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if tipo_filter %}&tipo={{ tipo_filter }}{% endif %}{% if estado_filter %}&estado={{ estado_filter }}{% endif %}" aria-label="Siguiente">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ constancias.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if tipo_filter %}&tipo={{ tipo_filter }}{% endif %}{% if estado_filter %}&estado={{ estado_filter }}{% endif %}" aria-label="Última">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">&raquo;</span>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">&raquo;&raquo;</span>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <!-- Información de paginación -->
+                <div class="text-center text-muted mt-2">
+                    <small>
+                        Mostrando {{ constancias.start_index }} - {{ constancias.end_index }} de {{ constancias.paginator.count }} constancias
+                    </small>
+                </div>
+            </nav>
+            {% endif %}
+
             {% else %}
             <div class="text-center py-5">
                 <i class="fas fa-file-pdf fa-3x text-muted mb-3"></i>
-                <h4 class="text-muted">No hay constancias generadas</h4>
-                <p class="text-muted">Comienza generando tu primera constancia de estudios.</p>
+                <h4 class="text-muted">No se encontraron constancias</h4>
+                <p class="text-muted">
+                    {% if search_query or tipo_filter or estado_filter %}
+                    No hay constancias que coincidan con los criterios de búsqueda.
+                    {% else %}
+                    No hay constancias generadas.
+                    {% endif %}
+                </p>
+                {% if search_query or tipo_filter or estado_filter %}
+                <a href="{% url 'certificate_list' %}" class="btn btn-primary-custom">
+                    <i class="fas fa-list me-2"></i>Ver todas las constancias
+                </a>
+                {% else %}
                 <a href="{% url 'generate_certificate' %}" class="btn btn-primary-custom">
                     <i class="fas fa-plus me-2"></i>Generar Primera Constancia
                 </a>
+                {% endif %}
             </div>
             {% endif %}
         </div>
     </div>
 </div>
+
+<style>
+.form-label {
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.table th {
+    font-weight: 600;
+    background-color: var(--color-primary) !important;
+    color: white;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.pagination .page-link {
+    color: var(--color-primary);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+</style>
 {% endblock %}

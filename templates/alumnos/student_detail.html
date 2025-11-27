@@ -83,6 +83,9 @@
                                     <span class="text-muted">No asignada</span>
                                 {% endif %}
                             </p>
+                            <p><strong>Grupo:</strong> 
+                                <span class="badge bg-secondary">{{ alumno.grupo }}</span>
+                            </p>
                             <p><strong>Semestre Actual:</strong> {{ alumno.semestre_actual }}</p>
                             <p><strong>Turno:</strong> {{ alumno.get_turno_display }}</p>
                         </div>

@@ -4,118 +4,147 @@
     <meta charset="utf-8">
     <title>Acta de Evaluación - {{ acta.materia.nombre }}</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .logos { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .logo { height: 80px; }
-        .title { text-align: center; margin: 20px 0; }
-        .info-table { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
-        .info-table td { padding: 5px; border: 1px solid #ddd; }
-        .grades-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        .grades-table th, .grades-table td { border: 1px solid #000; padding: 8px; text-align: center; }
-        .grades-table th { background-color: #f2f2f2; }
-        .signatures { display: flex; justify-content: space-between; margin-top: 50px; }
-        .signature { text-align: center; width: 45%; }
-        .signature-line { border-top: 1px solid #000; margin: 40px 0 10px; }
-        .section-title { background-color: #f0f0f0; padding: 10px; margin: 20px 0; text-align: center; font-weight: bold; }
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0;
+            padding: 0;
+            font-size: 12px;
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 10px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+        .title { 
+            text-align: center; 
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .info-table { 
+            width: 100%; 
+            margin-bottom: 15px; 
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+        .info-table td { 
+            padding: 3px 5px; 
+            border: 1px solid #000;
+            vertical-align: top;
+        }
+        .grades-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 15px;
+            font-size: 10px;
+        }
+        .grades-table th, .grades-table td { 
+            border: 1px solid #000; 
+            padding: 4px;
+            text-align: center;
+        }
+        .grades-table th { 
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .signatures { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-top: 40px;
+        }
+        .signature { 
+            text-align: center; 
+            width: 45%; 
+        }
+        .signature-line { 
+            border-top: 1px solid #000; 
+            margin: 30px 0 5px;
+        }
+        .section-title { 
+            background-color: #d9d9d9; 
+            padding: 5px; 
+            margin: 10px 0 5px; 
+            text-align: center; 
+            font-weight: bold;
+            font-size: 11px;
+        }
+        .no-border { border: none !important; }
+        .text-left { text-align: left !important; }
+        .page-break { page-break-after: always; }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="logos">
-            <img src="{{ logo_izquierdo }}" class="logo" alt="Logo Izquierdo">
-            <img src="{{ logo_central }}" class="logo" alt="Logo Central">
-            <div style="text-align: right;">
-                <div><strong>BENEMÉRITA ESCUELA NORMAL URBANA NOCTURNA DEL ESTADO</strong></div>
-                <div>"ING. JOSÉ G. VALENZUELA"</div>
-                <div>Clave: 02ENL0004Y</div>
-            </div>
-        </div>
-        
-        <div class="title">
-            <h2>ACTA DE EVALUACIÓN</h2>
+        <div style="font-weight: bold; font-size: 14px;">
+            BENEMÉRITA ESCUELA NORMAL URBANA NOCTURNA DEL ESTADO<br>
+            "ING. JOSÉ G. VALENZUELA"
         </div>
     </div>
 
-    <div class="section-title">INFORMACIÓN GENERAL</div>
+    <div class="title">
+        <div style="font-size: 13px; font-weight: bold;">ACTA DE EVALUACIÓN</div>
+    </div>
 
+    <!-- INFORMACIÓN GENERAL -->
     <table class="info-table">
         <tr>
-            <td><strong>CICLO ESCOLAR:</strong> {{ ciclo_escolar }}</td>
-            <td><strong>CARRERA:</strong> {{ acta.carrera.nombre }}</td>
+            <td width="50%"><strong>CICLO ESCOLAR:</strong> {{ ciclo_escolar }}</td>
+            <td width="50%"><strong>CARRERA:</strong> {{ acta.carrera.nombre }}</td>
         </tr>
         <tr>
             <td><strong>MATERIA:</strong> {{ acta.materia.nombre }}</td>
-            <td><strong>CLAVE:</strong> {{ acta.materia.unidades.first.codigo|default:acta.materia.nombre|slice:":10"|upper }}</td>
+            <td><strong>CLAVE:</strong> {{ materia_codigo }}</td>
         </tr>
         <tr>
             <td><strong>SEMESTRE:</strong> {{ acta.semestre }}</td>
-            <td><strong>TURNO:</strong> {{ turno|default:"MATUTINO" }}</td>
+            <td><strong>TURNO:</strong> {{ turno|upper }}</td>
         </tr>
         <tr>
             <td><strong>GRUPO:</strong> {{ acta.grupo }}</td>
             <td><strong>TOTAL HORAS:</strong> {{ total_horas }}</td>
         </tr>
-        <tr>
-            <td><strong>DOCENTE:</strong> {{ acta.generada_por.get_full_name|default:"Nombre del Docente" }}</td>
-            <td><strong>FECHA:</strong> {{ acta.fecha_emision|date:"d/m/Y" }}</td>
-        </tr>
     </table>
 
-    <div class="section-title">CALIFICACIONES</div>
-
+    <!-- TABLA DE CALIFICACIONES -->
     <table class="grades-table">
         <thead>
             <tr>
-                <th>No.</th>
-                <th>MATRÍCULA</th>
-                <th>NOMBRE DEL ALUMNO</th>
-                {% for unidad in unidades %}
-                <th>UNIDAD {{ unidad.numero }}</th>
-                {% endfor %}
-                <th>EVIDENCIA FINAL</th>
-                <th>EVALUACIÓN GLOBAL</th>
+                <th width="4%">No.</th>
+                <th width="8%">MATRÍCULA</th>
+                <th width="35%" class="text-left">NOMBRE DEL ALUMNO</th>
+                <th width="8%">UNIDAD 1</th>
+                <th width="8%">UNIDAD 2</th>
+                <th width="10%">EVIDENCIA FINAL</th>
+                <th width="12%">EVALUACIÓN GLOBAL</th>
+                <th width="15%">NASISTENCIAS</th>
             </tr>
         </thead>
         <tbody>
-            {% for calificacion in calificaciones|dictsort:"alumno.matricula" %}
+            {% for alumno in alumnos %}
             <tr>
                 <td>{{ forloop.counter }}</td>
-                <td>{{ calificacion.alumno.matricula }}</td>
-                <td>{{ calificacion.alumno.nombre_completo }}</td>
-                <td>{{ calificacion.calificacion|default:"N/A" }}</td>
-                <td>N/A</td>
-                <td>N/A</td>
-                <td>N/A</td>
+                <td>{{ alumno.matricula }}</td>
+                <td class="text-left">{{ alumno.nombre_completo }}</td>
+                <td>{{ alumno.calificaciones.unidad1|default:"N/A" }}</td>
+                <td>{{ alumno.calificaciones.unidad2|default:"N/A" }}</td>
+                <td>{{ alumno.calificaciones.evidencia_final|default:"N/A" }}</td>
+                <td>{{ alumno.calificaciones.evaluacion_global|default:"N/A" }}</td>
+                <td>{{ alumno.asistencias|default:"0" }}</td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7" style="text-align: center;">No hay calificaciones registradas</td>
+                <td colspan="8" style="text-align: center;">No hay alumnos registrados</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <div class="section-title">VALORES DE REFERENCIA</div>
-
-    <table class="info-table">
-        <tr>
-            <td><strong>Valor mínimo aceptado:</strong> 5</td>
-            <td><strong>Valor máximo aceptado:</strong> 10</td>
-        </tr>
-    </table>
-
-    <div class="stats" style="margin-top: 20px;">
-        <p><strong>Total de alumnos:</strong> {{ acta.total_alumnos }}</p>
-        <p><strong>Alumnos evaluados:</strong> {{ acta.alumnos_evaluados }}</p>
-        <p><strong>Promedio del grupo:</strong> {{ acta.promedio_grupo|default:"N/A" }}</p>
-    </div>
-
+    <!-- FIRMAS -->
     <div class="signatures">
         <div class="signature">
             <div class="signature-line"></div>
             <strong>DOCENTE</strong><br>
-            {{ acta.generada_por.get_full_name|default:"Nombre del Docente" }}
+            {{ docente_nombre|default:"Nombre del Docente" }}
         </div>
         <div class="signature">
             <div class="signature-line"></div>

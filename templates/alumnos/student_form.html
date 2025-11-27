@@ -228,6 +228,12 @@
                             <option value="graduado" {% if alumno.estado == 'graduado' %}selected{% endif %}>Graduado</option>
                         </select>
                     </div>
+                    <div class="col-md-6">
+                        <label for="grupo" class="form-label">Grupo *</label>
+                        <input type="text" class="form-control" id="grupo" name="grupo" 
+                            value="{{ alumno.grupo|default:'000' }}" required
+                            pattern="[0-9]{3}" title="El grupo debe tener 3 dígitos (ej: 101, 102)">
+                    </div>
                 </div>
             </div>
         </div>

@@ -148,8 +148,15 @@ class Materia(models.Model):
         super().save(*args, **kwargs)
 
 class Calificacion(models.Model):
+    TIPO_CALIFICACION_CHOICES = [
+        ('unidad', 'Unidad'),
+        ('evidencia_final', 'Evidencia Final'),
+        ('evaluacion_global', 'Evaluación Global'),
+    ]
+    
     alumno = models.ForeignKey('alumnos.Alumno', on_delete=models.CASCADE)
-    unidad = models.ForeignKey(Unidad, on_delete=models.CASCADE)  # Por unidad, no por materia
+    unidad = models.ForeignKey(Unidad, on_delete=models.CASCADE, null=True, blank=True)
+    tipo_calificacion = models.CharField(max_length=20, choices=TIPO_CALIFICACION_CHOICES, default='unidad')
     calificacion = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
     periodo = models.CharField(max_length=20)
     fecha_registro = models.DateTimeField(auto_now_add=True)
@@ -158,7 +165,7 @@ class Calificacion(models.Model):
     class Meta:
         verbose_name = 'Calificación'
         verbose_name_plural = 'Calificaciones'
-        unique_together = ['alumno', 'unidad', 'periodo']
+        unique_together = ['alumno', 'unidad', 'periodo', 'tipo_calificacion']
         ordering = ['alumno', 'unidad__numero']
     
     def __str__(self):

@@ -66,6 +66,11 @@ class Alumno(models.Model):
     semestre_actual = models.PositiveIntegerField(default=1)
     turno = models.CharField(max_length=20, choices=TURNO_CHOICES, default='matutino')
     plan = models.PositiveIntegerField(default=2023)
+    grupo = models.CharField(
+        max_length=10,
+        default='101',
+        help_text='Ejemplo: 101, 102, 201, etc.'
+    )
     
     # Información de contacto con validaciones
     email_institucional = EncryptedCharField(

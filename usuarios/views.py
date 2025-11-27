@@ -1,8 +1,9 @@
-# usuarios/views.py - ACTUALIZADO CON VALIDACIONES
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
+from django.core.paginator import Paginator
+from django.db.models import Q
 from core.decorators import control_escolar_required, directivo_required
 from .models import Usuario
 from django.core.exceptions import ValidationError
@@ -17,6 +18,15 @@ def user_list(request):
     # EXCLUIR usuarios de tipo 'alumno'
     usuarios = Usuario.objects.exclude(tipo_usuario='alumno').order_by('first_name', 'last_name')
     
+    # Búsqueda por nombre o email
+    search_query = request.GET.get('search', '')
+    if search_query:
+        usuarios = usuarios.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(email__icontains=search_query)
+        )
+    
     # Filtros
     tipo_filter = request.GET.get('tipo', '')
     estado_filter = request.GET.get('estado', '')
@@ -29,10 +39,16 @@ def user_list(request):
         elif estado_filter == 'inactivo':
             usuarios = usuarios.filter(is_active=False)
     
+    # Paginación - 20 elementos por página
+    paginator = Paginator(usuarios, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     context = {
-        'usuarios': usuarios,
+        'usuarios': page_obj,
         'tipo_filter': tipo_filter,
         'estado_filter': estado_filter,
+        'search_query': search_query,
         'page_title': 'Lista de Usuarios'
     }
     return render(request, 'usuarios/user_list.html', context)

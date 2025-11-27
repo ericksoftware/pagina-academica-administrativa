@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse, FileResponse
+from django.core.paginator import Paginator
 from core.decorators import control_escolar_required
 from .models import Constancia
 from alumnos.models import Alumno
@@ -12,14 +13,42 @@ from weasyprint import HTML
 import tempfile
 from django.templatetags.static import static
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.db.models import Q
 
 @control_escolar_required
 def certificate_list(request):
-    """Lista de todas las constancias"""
-    constancias = Constancia.objects.all().order_by('-fecha_generacion')
+    """Lista de todas las constancias con paginación"""
+    constancias_list = Constancia.objects.all().select_related('alumno').order_by('-fecha_generacion')
+    
+    # Búsqueda por nombre o matrícula del alumno
+    search_query = request.GET.get('search', '')
+    if search_query:
+        constancias_list = constancias_list.filter(
+            Q(alumno__nombre__icontains=search_query) |
+            Q(alumno__apellido_paterno__icontains=search_query) |
+            Q(alumno__apellido_materno__icontains=search_query) |
+            Q(alumno__matricula__icontains=search_query)
+        )
+    
+    # Filtros
+    tipo_filter = request.GET.get('tipo', '')
+    estado_filter = request.GET.get('estado', '')
+    
+    if tipo_filter:
+        constancias_list = constancias_list.filter(tipo_constancia=tipo_filter)
+    if estado_filter:
+        constancias_list = constancias_list.filter(estado=estado_filter)
+    
+    # Paginación - 10 elementos por página
+    paginator = Paginator(constancias_list, 10)
+    page_number = request.GET.get('page')
+    constancias = paginator.get_page(page_number)
     
     context = {
         'constancias': constancias,
+        'search_query': search_query,
+        'tipo_filter': tipo_filter,
+        'estado_filter': estado_filter,
         'page_title': 'Lista de Constancias'
     }
     return render(request, 'constancias/certificate_list.html', context)
@@ -31,6 +60,10 @@ def generate_certificate(request):
         try:
             alumno_id = request.POST.get('alumno')
             fecha_emision = request.POST.get('fecha_emision')
+            firma_izquierda = request.POST.get('firma_izquierda', 'Vo.Bo. Subdirección Académica')
+            firma_derecha = request.POST.get('firma_derecha', 'DRA. LIUBA ABIYOVA TÉLLEZ OSUNA')
+            costo = float(request.POST.get('costo', 0.0))
+            lema_anio = request.POST.get('lema_anio', '') 
             
             alumno = Alumno.objects.get(id=alumno_id)
             
@@ -39,7 +72,11 @@ def generate_certificate(request):
                 alumno=alumno,
                 tipo_constancia='estudios',  # Siempre será de estudios
                 fecha_emision=fecha_emision,
-                estado='generada'
+                estado='generada',
+                firma_izquierda=firma_izquierda,
+                firma_derecha=firma_derecha,
+                costo=costo,
+                lema_anio=lema_anio  # Nuevo campo
             )
             
             # Generar PDF, render con contexto que incluye URLS absolutas de las imageness

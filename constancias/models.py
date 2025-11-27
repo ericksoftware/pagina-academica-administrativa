@@ -22,6 +22,20 @@ class Constancia(models.Model):
     observaciones = models.TextField(blank=True)
     archivo_pdf = models.FileField(upload_to='constancias/%Y/%m/%d/', blank=True, null=True)
     
+    # Nuevos campos para las firmas
+    firma_izquierda = models.CharField(max_length=100, default='Vo.Bo. Subdirección Académica')
+    firma_derecha = models.CharField(max_length=100, default='DRA. LIUBA ABIYOVA TÉLLEZ OSUNA')
+    
+    # Nuevo campo para el costo
+    costo = models.FloatField(default=0.0, verbose_name='Costo de la constancia')
+    
+    # NUEVO CAMPO: Lema del año
+    lema_anio = models.CharField(
+        max_length=200, 
+        default='2025, Año del Turismo Sostenible como Impulsor del Bienestar Social y Progreso',
+        verbose_name='Lema del año'
+    )
+    
     class Meta:
         verbose_name = 'Constancia'
         verbose_name_plural = 'Constancias'

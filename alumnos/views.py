@@ -2,6 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseForbidden
+from django.core.paginator import Paginator
+from django.db.models import Q
 from core.decorators import control_escolar_required
 from .models import Alumno
 from evaluaciones.models import Carrera, Calificacion, Materia, Unidad
@@ -11,11 +13,24 @@ from django.core.exceptions import ValidationError
 @control_escolar_required
 def student_list(request):
     """Lista de todos los alumnos - Solo control escolar"""
-    alumnos = Alumno.objects.all().order_by('apellido_paterno', 'apellido_materno', 'nombre')
+    alumnos = Alumno.objects.all().order_by('grupo', 'apellido_paterno', 'apellido_materno', 'nombre')
+    
+    # Búsqueda por nombre o matrícula
+    search_query = request.GET.get('search', '')
+    if search_query:
+        alumnos = alumnos.filter(
+            Q(nombre__icontains=search_query) |
+            Q(apellido_paterno__icontains=search_query) |
+            Q(apellido_materno__icontains=search_query) |
+            Q(matricula__icontains=search_query)
+        )
     
     # Filtros
     estado_filter = request.GET.get('estado', '')
     carrera_filter = request.GET.get('carrera', '')
+    grupo_filter = request.GET.get('grupo', '')
+    if grupo_filter:
+        alumnos = alumnos.filter(grupo=grupo_filter)
     
     if estado_filter:
         alumnos = alumnos.filter(estado=estado_filter)
@@ -24,11 +39,18 @@ def student_list(request):
     
     carreras = Carrera.objects.all()
     
+    # Paginación - 20 elementos por página
+    paginator = Paginator(alumnos, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     context = {
-        'alumnos': alumnos,
+        'alumnos': page_obj,
         'carreras': carreras,
         'estado_filter': estado_filter,
         'carrera_filter': carrera_filter,
+        'grupo_filter': grupo_filter,
+        'search_query': search_query,
         'page_title': 'Lista de Alumnos'
     }
     return render(request, 'alumnos/student_list.html', context)
@@ -128,6 +150,18 @@ def student_create(request):
                             errores.append(f'El correo institucional "{email_institucional}" ya le pertenece al alumno: {alumno_existente.nombre_completo()}')
                             break
             
+            # Validar grupo
+            grupo = request.POST.get('grupo', '101').strip()
+            if not grupo or len(grupo) != 3 or not grupo.isdigit():
+                messages.error(request, 'El grupo debe tener exactamente 3 dígitos numéricos')
+                context = {
+                    'carreras': carreras,
+                    'page_title': 'Registrar Nuevo Alumno',
+                    'modo': 'crear',
+                    'alumno': request.POST
+                }
+                return render(request, 'alumnos/student_form.html', context)
+            
             # Si hay errores, mostrar todos
             if errores:
                 for error in errores:
@@ -145,6 +179,7 @@ def student_create(request):
             
             # Información básica
             alumno.matricula = matricula
+            alumno.grupo = grupo
             alumno.curp = curp
             alumno.rfc = rfc
             alumno.nombre = request.POST.get('nombre', 'N/A').strip()
@@ -247,6 +282,7 @@ def student_edit(request, student_id):
             nueva_curp = request.POST.get('curp', 'N/A').strip().upper()
             nuevo_rfc = request.POST.get('rfc', 'N/A').strip().upper()
             nuevo_email_institucional = request.POST.get('email_institucional', 'Pendiente').strip()
+            nuevo_grupo = request.POST.get('grupo', '000').strip()
             
             # Validaciones de duplicados - BUSCANDO EN TODOS LOS REGISTROS
             errores = []
@@ -281,6 +317,10 @@ def student_edit(request, student_id):
                             errores.append(f'El correo institucional "{nuevo_email_institucional}" ya le pertenece al alumno: {alumno_existente.nombre_completo()}')
                             break
             
+            if not nuevo_grupo or len(nuevo_grupo) != 3 or not nuevo_grupo.isdigit():
+                messages.error(request, 'El grupo debe tener exactamente 3 dígitos numéricos')
+                return redirect('student_edit', student_id=student_id)
+            
             # Si hay errores, mostrar todos
             if errores:
                 for error in errores:
@@ -293,6 +333,7 @@ def student_edit(request, student_id):
             alumno.rfc = nuevo_rfc
             alumno.apellido_paterno = request.POST.get('apellido_paterno', 'N/A').strip()
             alumno.apellido_materno = request.POST.get('apellido_materno', 'N/A').strip()
+            alumno.grupo = nuevo_grupo
             
             # Información personal
             alumno.municipio_nacimiento = request.POST.get('municipio_nacimiento', 'N/A')

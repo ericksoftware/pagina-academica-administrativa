@@ -14,6 +14,8 @@ from weasyprint import HTML
 from django.db import models
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.templatetags.static import static
+from django.db.models import Q 
+from django.core.paginator import Paginator
 
 @control_escolar_required
 def grade_list(request):
@@ -209,10 +211,38 @@ def download_transcript(request, transcript_id):
 @control_escolar_required
 def lista_carreras(request):
     """Lista todas las carreras"""
-    carreras = Carrera.objects.all().order_by('id')
+    carreras_list = Carrera.objects.all().order_by('id')
+    
+    # Búsqueda por nombre o código
+    search_query = request.GET.get('search', '')
+    if search_query:
+        carreras_list = carreras_list.filter(
+            Q(nombre__icontains=search_query) |
+            Q(codigo__icontains=search_query)
+        )
+    
+    # Filtros
+    tipo_filter = request.GET.get('tipo', '')
+    estado_filter = request.GET.get('estado', '')
+    
+    if tipo_filter:
+        carreras_list = carreras_list.filter(tipo_carrera=tipo_filter)
+    if estado_filter:
+        if estado_filter == 'activa':
+            carreras_list = carreras_list.filter(activa=True)
+        elif estado_filter == 'inactiva':
+            carreras_list = carreras_list.filter(activa=False)
+    
+    # Paginación
+    paginator = Paginator(carreras_list, 10)
+    page_number = request.GET.get('page')
+    carreras = paginator.get_page(page_number)
     
     context = {
         'carreras': carreras,
+        'search_query': search_query,
+        'tipo_filter': tipo_filter,
+        'estado_filter': estado_filter,
         'page_title': 'Gestión de Carreras'
     }
     return render(request, 'evaluaciones/carreras/lista_carreras.html', context)
@@ -553,14 +583,54 @@ def asignar_materias_unidades_sin_asignar(request, carrera_id):
 
 @control_escolar_required
 def acta_list(request):
-    """Lista de todas las actas de evaluación - Similar a certificate_list"""
-    actas = ActaEvaluacion.objects.all().order_by('-fecha_generacion')
+    """Lista de todas las actas de evaluación"""
+    actas_list = ActaEvaluacion.objects.all().select_related('carrera', 'materia').order_by('-fecha_generacion')
+    
+    # Búsqueda
+    search_query = request.GET.get('search', '')
+    if search_query:
+        actas_list = actas_list.filter(
+            Q(materia__nombre__icontains=search_query) |
+            Q(carrera__nombre__icontains=search_query) |
+            Q(grupo__icontains=search_query) |
+            Q(periodo__icontains=search_query)
+        )
+    
+    # Filtros
+    carrera_filter = request.GET.get('carrera', '')
+    semestre_filter = request.GET.get('semestre', '')
+    estado_filter = request.GET.get('estado', '')
+    
+    if carrera_filter:
+        actas_list = actas_list.filter(carrera_id=carrera_filter)
+    if semestre_filter:
+        actas_list = actas_list.filter(semestre=semestre_filter)
+    if estado_filter:
+        actas_list = actas_list.filter(estado=estado_filter)
+    
+    carreras = Carrera.objects.all()
+    carrera_selected = None
+    if carrera_filter:
+        carrera_selected = Carrera.objects.filter(id=carrera_filter).first()
+    
+    # Paginación
+    paginator = Paginator(actas_list, 10)
+    page_number = request.GET.get('page')
+    actas = paginator.get_page(page_number)
     
     context = {
         'actas': actas,
+        'carreras': carreras,
+        'carrera_selected': carrera_selected,
+        'search_query': search_query,
+        'carrera_filter': carrera_filter,
+        'semestre_filter': semestre_filter,
+        'estado_filter': estado_filter,
         'page_title': 'Lista de Actas de Evaluación'
     }
     return render(request, 'evaluaciones/acta_list.html', context)
+
+# evaluaciones/views.py - Modificar la función generate_acta
 
 @control_escolar_required
 def generate_acta(request):
@@ -581,6 +651,50 @@ def generate_acta(request):
             carrera = Carrera.objects.get(id=carrera_id)
             materia = Materia.objects.get(id=materia_id)
             
+            # Obtener código de la materia (primera unidad)
+            materia_codigo = materia.unidades.first().codigo if materia.unidades.exists() else 'N/A'
+            
+            # Obtener alumnos que coincidan con los criterios
+            alumnos = Alumno.objects.filter(
+                carrera=carrera,
+                semestre_actual=semestre,
+                grupo=grupo,
+                turno=turno
+            ).order_by('apellido_paterno', 'apellido_materno', 'nombre')
+            
+            # Obtener calificaciones para cada alumno
+            alumnos_con_calificaciones = []
+            for alumno in alumnos:
+                # Buscar calificaciones del alumno para esta materia
+                calificaciones_alumno = {}
+                
+                # Obtener unidades de la materia
+                unidades_materia = materia.unidades.all().order_by('numero')
+                
+                # Obtener calificaciones por unidad
+                for i, unidad in enumerate(unidades_materia, 1):
+                    try:
+                        calificacion = Calificacion.objects.get(
+                            alumno=alumno,
+                            unidad=unidad,
+                            periodo=ciclo_escolar
+                        )
+                        calificaciones_alumno[f'unidad{i}'] = calificacion.calificacion
+                    except Calificacion.DoesNotExist:
+                        calificaciones_alumno[f'unidad{i}'] = None
+                
+                # Para este ejemplo, asumimos que tenemos campos para evidencia final y evaluación global
+                # En un sistema real, estos vendrían de modelos específicos
+                calificaciones_alumno['evidencia_final'] = None
+                calificaciones_alumno['evaluacion_global'] = None
+                
+                alumnos_con_calificaciones.append({
+                    'matricula': alumno.matricula,
+                    'nombre_completo': alumno.nombre_completo(),
+                    'calificaciones': calificaciones_alumno,
+                    'asistencias': 0  # En un sistema real, esto vendría de un modelo de asistencias
+                })
+            
             # Crear el acta
             acta = ActaEvaluacion.objects.create(
                 carrera=carrera,
@@ -593,39 +707,15 @@ def generate_acta(request):
                 generada_por=request.user
             )
             
-            # Obtener calificaciones para este acta
-            calificaciones = Calificacion.objects.filter(
-                alumno__carrera=carrera,
-                alumno__semestre_actual=semestre,
-                unidad__materias=materia,
-                periodo=ciclo_escolar
-            ).select_related('alumno', 'unidad')
-            
-            # Obtener unidades de la materia
-            unidades = Unidad.objects.filter(materias=materia).order_by('numero')
-            
-            # Calcular estadísticas
-            acta.total_alumnos = calificaciones.values('alumno').distinct().count()
-            acta.alumnos_evaluados = calificaciones.exclude(calificacion__isnull=True).count()
-            
-            if calificaciones.exists():
-                calificaciones_validas = calificaciones.exclude(calificacion__isnull=True)
-                if calificaciones_validas.exists():
-                    total_calificaciones = sum(calif.calificacion for calif in calificaciones_validas)
-                    acta.promedio_grupo = total_calificaciones / calificaciones_validas.count()
-            
-            acta.save()
-            
             # Generar PDF
             html_string = render_to_string('evaluaciones/acta_template.html', {
                 'acta': acta,
-                'calificaciones': calificaciones,
-                'unidades': unidades,
+                'alumnos': alumnos_con_calificaciones,
                 'turno': turno,
                 'ciclo_escolar': ciclo_escolar,
                 'total_horas': total_horas,
-                'logo_izquierdo': request.build_absolute_uri(static('img/logobc.jpg')),
-                'logo_central': request.build_absolute_uri(static('img/logobn.jpg')),
+                'materia_codigo': materia_codigo,
+                'docente_nombre': request.user.get_full_name(),
             })
             
             html = HTML(string=html_string, base_url=request.build_absolute_uri('/'))

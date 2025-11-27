@@ -1,4 +1,4 @@
-  {% load static %}<!DOCTYPE html>
+{% load static %}<!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="utf-8">
@@ -115,7 +115,7 @@
       </div>
 
     <div class="motto">
-      “2025, Año del Turismo Sostenible como Impulsor del Bienestar Social y Progreso”
+        "{{ constancia.lema_anio }}"
     </div>
 
     <section class="subject">
@@ -127,13 +127,12 @@
       <p class="title-to">A QUIEN CORRESPONDA:</p>
 
       <p class="paragraph">
-        Quien suscribe {% if constancia.director_nombre %}<span class="strong">{{ constancia.director_nombre }}</span>{% else %}Dra. Liuba Abiyova Téllez Osuna{% endif %}
-        {% if constancia.director_cargo %}{{ constancia.director_cargo }}{% else %}Directora{% endif %} de la
+        Quien suscribe <span class="strong">{{ constancia.firma_derecha }}</span> Director(a) de la
         <span class="strong">BENEMÉRITA ESCUELA NORMAL URBANA NOCTURNA DEL ESTADO. ING. JOSÉ G. VALENZUELA</span>,
         con clave <span class="strong">02ENL0004Y</span>, hace constar que según documentos que se encuentran en los archivos
         de esta Institución, la(el) C. <span class="strong sc">{{ constancia.alumno.nombre_completo }}</span>
         con número de matrícula <span class="strong">{{ constancia.alumno.matricula }}</span> y CURP:
-        <span class="strong">{{ constancia.alumno.curp }}</span>, es alumna(o) regular y se encuentra inscrita(o)
+        <span class="strong">{{ constancia.alumno.curp }}</span>, es alumno(a) regular y se encuentra inscrito(a)
         en el <span class="strong">{{ constancia.alumno.semestre_actual }}°</span> semestre, turno
         <span class="strong">{{ constancia.alumno.get_turno_display }}</span> de la
         <span class="strong">{{ constancia.alumno.carrera.nombre|default:"Licenciatura" }}</span>
@@ -171,13 +170,13 @@
       <section class="signatures">
         <div class="sig-col sig-left">
           <div class="sig-line"></div>
-          <div class="sig-name">Vo.Bo. Subdirección Académica</div>
+          <div class="sig-name">{{ constancia.firma_izquierda }}</div>
           <div class="sig-role">BENUNE</div>
         </div>
         <div class="sig-col sig-right">
           <div class="sig-line"></div>
-          <div class="sig-name">DRA. LIUBA ABIYOVA TÉLLEZ OSUNA</div>
-          <div class="sig-role">Directora de BENUNE</div>
+          <div class="sig-name">{{ constancia.firma_derecha }}</div>
+          <div class="sig-role">Director(a) de BENUNE</div>
         </div>
         <div style="clear: both;"></div>
       </section>

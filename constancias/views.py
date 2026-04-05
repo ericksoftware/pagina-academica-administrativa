@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse, FileResponse
 from django.core.paginator import Paginator
-from core.decorators import control_escolar_required
+from core.decorators import constancias_required
 from .models import Constancia
 from alumnos.models import Alumno
 import os
@@ -15,7 +15,7 @@ from django.templatetags.static import static
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.db.models import Q
 
-@control_escolar_required
+@constancias_required
 def certificate_list(request):
     """Lista de todas las constancias con paginación"""
     constancias_list = Constancia.objects.all().select_related('alumno').order_by('-fecha_generacion')
@@ -53,7 +53,7 @@ def certificate_list(request):
     }
     return render(request, 'constancias/certificate_list.html', context)
 
-@control_escolar_required
+@constancias_required
 def generate_certificate(request):
     """Generar una nueva constancia"""
     if request.method == 'POST':
@@ -117,7 +117,7 @@ def generate_certificate(request):
     }
     return render(request, 'constancias/generate_certificate.html', context)
 
-@control_escolar_required
+@constancias_required
 def view_certificate(request, certificate_id):
     """Ver una constancia específica - Muestra el PDF directamente"""
     constancia = get_object_or_404(Constancia, id=certificate_id)
@@ -128,7 +128,7 @@ def view_certificate(request, certificate_id):
     }
     return render(request, 'constancias/view_certificate.html', context)
 
-@control_escolar_required
+@constancias_required
 def download_certificate(request, certificate_id):
     """Descargar una constancia en PDF"""
     constancia = get_object_or_404(Constancia, id=certificate_id)
@@ -151,7 +151,7 @@ def download_certificate(request, certificate_id):
         return redirect('view_certificate', certificate_id=certificate_id)
 
 @xframe_options_exempt
-@control_escolar_required
+@constancias_required
 def view_pdf(request, certificate_id):
     """Vista especial para mostrar PDF en iframe"""
     constancia = get_object_or_404(Constancia, id=certificate_id)

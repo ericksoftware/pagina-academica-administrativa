@@ -1,60 +1,40 @@
-# core/decorators.py - ACTUALIZADO
+from functools import wraps
 from django.shortcuts import render
-from django.contrib.auth.decorators import user_passes_test
 
-def control_escolar_required(view_func):
-    """Decorator que permite el acceso solo a control escolar"""
-    def check_user(user):
-        return user.is_authenticated and hasattr(user, 'tipo_usuario') and user.tipo_usuario == 'control_escolar'
-    
-    def wrapper(request, *args, **kwargs):
-        if not check_user(request.user):
-            # Redirigir a la página de prohibido
-            return render(request, 'core/403.html', {
-                'exception': 'No tienes permisos para acceder a esta página'
-            }, status=403)
-        return view_func(request, *args, **kwargs)
-    
-    return wrapper
 
-def docente_required(view_func):
-    """Decorator que permite el acceso solo a docentes"""
-    def check_user(user):
-        return user.is_authenticated and hasattr(user, 'tipo_usuario') and user.tipo_usuario == 'docente'
-    
-    def wrapper(request, *args, **kwargs):
-        if not check_user(request.user):
-            return render(request, 'core/403.html', {
-                'exception': 'No tienes permisos para acceder a esta página'
-            }, status=403)
-        return view_func(request, *args, **kwargs)
-    
-    return wrapper
+def roles_required(*allowed_roles):
+    """
+    Decorador genérico para permitir acceso solo a ciertos roles.
+    """
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+            user = request.user
 
-def directivo_required(view_func):
-    """Decorator que permite el acceso solo a directivos"""
-    def check_user(user):
-        return user.is_authenticated and hasattr(user, 'tipo_usuario') and user.tipo_usuario == 'directivo'
-    
-    def wrapper(request, *args, **kwargs):
-        if not check_user(request.user):
-            return render(request, 'core/403.html', {
-                'exception': 'No tienes permisos para acceder a esta página'
-            }, status=403)
-        return view_func(request, *args, **kwargs)
-    
-    return wrapper
+            if not user.is_authenticated:
+                return render(request, 'core/403.html', {
+                    'exception': 'Debes iniciar sesión para acceder a esta página'
+                }, status=403)
 
-def alumno_required(view_func):
-    """Decorator que permite el acceso solo a alumnos"""
-    def check_user(user):
-        return user.is_authenticated and hasattr(user, 'tipo_usuario') and user.tipo_usuario == 'alumno'
-    
-    def wrapper(request, *args, **kwargs):
-        if not check_user(request.user):
-            return render(request, 'core/403.html', {
-                'exception': 'No tienes permisos para acceder a esta página'
-            }, status=403)
-        return view_func(request, *args, **kwargs)
-    
-    return wrapper
+            tipo_usuario = getattr(user, 'tipo_usuario', None)
+
+            if tipo_usuario not in allowed_roles:
+                return render(request, 'core/403.html', {
+                    'exception': 'No tienes permisos para acceder a esta página'
+                }, status=403)
+
+            return view_func(request, *args, **kwargs)
+        return wrapper
+    return decorator
+
+
+# Decoradores simples
+control_escolar_required = roles_required('control_escolar')
+docente_required = roles_required('docente')
+directivo_required = roles_required('directivo')
+alumno_required = roles_required('alumno')
+
+# Decoradores compuestos
+control_escolar_or_directivo_required = roles_required('control_escolar', 'directivo')
+constancias_required = roles_required('alumno', 'control_escolar', 'directivo')
+actas_required = roles_required('docente', 'control_escolar', 'directivo')

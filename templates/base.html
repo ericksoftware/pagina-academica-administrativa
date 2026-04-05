@@ -284,24 +284,41 @@
                             <i class="fas fa-home"></i>Inicio
                         </a>
                     </li>
-                    
-                    <!-- Solo mostrar Alumnos si es control escolar -->
-                    {% if user.tipo_usuario == 'control_escolar' %}
+
+                    {% if user.tipo_usuario == 'control_escolar' or user.tipo_usuario == 'directivo' %}
                     <li class="nav-item">
-                        <a class="nav-link {% if 'student' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'student_list' %}">
+                        <a class="nav-link {% if '/alumnos/' in request.path %}active{% endif %}" href="{% url 'student_list' %}">
                             <i class="fas fa-users"></i>Alumnos
                         </a>
                     </li>
                     {% endif %}
-                    {% if user.tipo_usuario == 'control_escolar' %}
+
+                    {% if user.tipo_usuario == 'alumno' or user.tipo_usuario == 'control_escolar' or user.tipo_usuario == 'directivo' %}
                     <li class="nav-item">
-                        <a class="nav-link {% if 'certificate' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'certificate_list' %}">
+                        <a class="nav-link {% if '/constancias/' in request.path %}active{% endif %}" href="{% url 'certificate_list' %}">
                             <i class="fas fa-file-certificate"></i>Constancias
                         </a>
                     </li>
+                    {% endif %}
+
+                    {% if user.tipo_usuario == 'docente' or user.tipo_usuario == 'control_escolar' or user.tipo_usuario == 'directivo' %}
                     <li class="nav-item">
-                        <a class="nav-link {% if 'grade' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'acta_list' %}">
-                            <i class="fas fa-clipboard-list"></i>Evaluaciones
+                        <a class="nav-link {% if '/evaluaciones/actas/' in request.path %}active{% endif %}" href="{% url 'acta_list' %}">
+                            <i class="fas fa-clipboard-list"></i>Actas
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% if user.tipo_usuario == 'control_escolar' or user.tipo_usuario == 'directivo' %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/evaluaciones/carreras/' in request.path or '/evaluaciones/materia/' in request.path %}active{% endif %}" href="{% url 'lista_carreras' %}">
+                            <i class="fas fa-university"></i>Carreras
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/usuarios/' in request.path %}active{% endif %}" href="{% url 'user_list' %}">
+                            <i class="fas fa-user-cog"></i>Usuarios
                         </a>
                     </li>
                     {% endif %}

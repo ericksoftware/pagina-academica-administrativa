@@ -8,7 +8,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="h2 text-primary-custom">Generar Acta de Evaluación</h1>
-            <p class="lead">Complete los datos para generar un acta de evaluación</p>
+            <p class="lead">Seleccione la carrera, el semestre, la materia y capture los datos restantes.</p>
         </div>
     </div>
 
@@ -16,11 +16,11 @@
         <div class="card-body">
             <form method="post" id="actaForm">
                 {% csrf_token %}
-                
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <h4 class="text-primary-custom mb-3">Información Académica</h4>
-                        
+
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <h4 class="text-primary-custom mb-3">Selección académica</h4>
+
                         <div class="mb-3">
                             <label for="carrera" class="form-label">Carrera *</label>
                             <select class="form-select" id="carrera" name="carrera" required>
@@ -30,17 +30,18 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label for="semestre" class="form-label">Semestre *</label>
-                            <input type="number" class="form-control" id="semestre" name="semestre" 
-                                   min="1" max="12" placeholder="Ej: 4" required>
+                            <input type="number" class="form-control" id="semestre" name="semestre" min="1" max="12" required>
                         </div>
-                        
+
                         <div class="mb-3">
-                            <label for="grupo" class="form-label">Grupo *</label>
-                            <input type="text" class="form-control" id="grupo" name="grupo" 
-                                   placeholder="Ej: M" required>
+                            <label for="materia" class="form-label">Materia *</label>
+                            <select class="form-select" id="materia" name="materia" required disabled>
+                                <option value="">-- Primero seleccione carrera y semestre --</option>
+                            </select>
+                            <div class="form-text" id="materiaHelp">La materia se cargará según la carrera y el semestre.</div>
                         </div>
 
                         <div class="mb-3">
@@ -52,60 +53,93 @@
                             </select>
                         </div>
                     </div>
-                    
-                    <div class="col-md-6">
-                        <h4 class="text-primary-custom mb-3">Materia y Periodo</h4>
-                        
+
+                    <div class="col-lg-6">
+                        <h4 class="text-primary-custom mb-3">Datos del acta</h4>
+
                         <div class="mb-3">
-                            <label for="materia" class="form-label">Materia *</label>
-                            <select class="form-select" id="materia" name="materia" required disabled>
-                                <option value="">-- Primero seleccione una carrera --</option>
-                            </select>
-                            <div class="form-text" id="materiaHelp">
-                                Las materias se cargarán automáticamente al seleccionar una carrera
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="ciclo_escolar" class="form-label">Ciclo Escolar *</label>
-                            <input type="text" class="form-control" id="ciclo_escolar" name="ciclo_escolar" 
-                                   placeholder="Ej: 2024-2025" required>
+                            <label for="ciclo_escolar" class="form-label">Ciclo escolar *</label>
+                            <input type="text" class="form-control" id="ciclo_escolar" name="ciclo_escolar" placeholder="Ej: 2024-2025" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="total_horas" class="form-label">Total de Horas *</label>
-                            <input type="number" class="form-control" id="total_horas" name="total_horas" 
-                                   placeholder="Ej: 72" required>
+                            <label for="docente_identificador" class="form-label">Identificador del docente *</label>
+                            <input type="text" class="form-control" id="docente_identificador" name="docente_identificador" placeholder="Ej: 27" required>
                         </div>
-                        
+
                         <div class="mb-3">
-                            <label for="fecha_emision" class="form-label">Fecha de Emisión *</label>
-                            <input type="date" class="form-control" id="fecha_emision" name="fecha_emision" 
-                                   value="{% now 'Y-m-d' %}" required>
+                            <label for="docente_nombre" class="form-label">Profesor encargado *</label>
+                            <input type="text" class="form-control" id="docente_nombre" name="docente_nombre" placeholder="Ej: TELLEZ OSUNA, LIUBA ABIYOVA" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fecha_emision" class="form-label">Fecha de emisión *</label>
+                            <input type="date" class="form-control" id="fecha_emision" name="fecha_emision" value="{% now 'Y-m-d' %}" required>
                         </div>
                     </div>
                 </div>
 
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong>Información que se obtendrá automáticamente:</strong><br>
-                    - Nombre del docente (usuario actual)<br>
-                    - Lista de alumnos con sus calificaciones<br>
-                    - Código de la materia<br>
-                    - Valor mínimo y máximo aceptado
-                </div>
-                
-                <div class="row">
-                    <div class="col-12">
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{% url 'acta_list' %}" class="btn btn-secondary me-md-2">
-                                <i class="fas fa-times me-2"></i>Cancelar
-                            </a>
-                            <button type="submit" class="btn btn-primary-custom">
-                                <i class="fas fa-file-pdf me-2"></i>Generar Acta
-                            </button>
-                        </div>
+                <hr class="my-4">
+
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Código de carrera</label>
+                        <input type="text" class="form-control" id="preview_carrera_codigo" readonly>
                     </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Plan</label>
+                        <input type="text" class="form-control" id="preview_plan" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Código de materia</label>
+                        <input type="text" class="form-control" id="preview_materia_codigo" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Total horas</label>
+                        <input type="text" class="form-control" id="preview_total_horas" readonly>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="button" id="btnPreview" class="btn btn-outline-primary">
+                        <i class="fas fa-users me-2"></i>Cargar alumnos y calificaciones
+                    </button>
+                </div>
+
+                <div id="previewWrapper" class="mt-4 d-none">
+                    <div class="alert alert-info">
+                        <strong>Importante:</strong>
+                        capture las <strong>inasistencias</strong> una por una.
+                        La <strong>evaluación global</strong> y el <strong>% de inasistencias</strong>
+                        se calcularán automáticamente en el Excel.
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Código</th>
+                                    <th>Matrícula</th>
+                                    <th>Nombre del alumno</th>
+                                    <th>Unidad 1</th>
+                                    <th>Unidad 2</th>
+                                    <th>Evidencia final</th>
+                                    <th>Inasistencias</th>
+                                </tr>
+                            </thead>
+                            <tbody id="previewBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-end gap-2">
+                    <a href="{% url 'acta_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </a>
+                    <button type="submit" id="btnSubmit" class="btn btn-primary-custom" disabled>
+                        <i class="fas fa-file-excel me-2"></i>Generar Acta Excel
+                    </button>
                 </div>
             </form>
         </div>
@@ -115,70 +149,170 @@
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const carreraSelect = document.getElementById('carrera');
-    const materiaSelect = document.getElementById('materia');
+document.addEventListener('DOMContentLoaded', function () {
+    const carrera = document.getElementById('carrera');
+    const semestre = document.getElementById('semestre');
+    const materia = document.getElementById('materia');
+    const turno = document.getElementById('turno');
+    const cicloEscolar = document.getElementById('ciclo_escolar');
     const materiaHelp = document.getElementById('materiaHelp');
-    
-    // Función para cargar materias por carrera
-    function cargarMaterias(carreraId) {
-        if (!carreraId) {
-            materiaSelect.innerHTML = '<option value="">-- Primero seleccione una carrera --</option>';
-            materiaSelect.disabled = true;
-            materiaHelp.textContent = 'Las materias se cargarán automáticamente al seleccionar una carrera';
+
+    const btnPreview = document.getElementById('btnPreview');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const previewWrapper = document.getElementById('previewWrapper');
+    const previewBody = document.getElementById('previewBody');
+
+    const previewCarreraCodigo = document.getElementById('preview_carrera_codigo');
+    const previewPlan = document.getElementById('preview_plan');
+    const previewMateriaCodigo = document.getElementById('preview_materia_codigo');
+    const previewTotalHoras = document.getElementById('preview_total_horas');
+
+    function resetPreview() {
+        previewWrapper.classList.add('d-none');
+        previewBody.innerHTML = '';
+        btnSubmit.disabled = true;
+
+        previewCarreraCodigo.value = '';
+        previewPlan.value = '';
+        previewMateriaCodigo.value = '';
+        previewTotalHoras.value = '';
+    }
+
+    async function cargarMaterias() {
+        resetPreview();
+
+        const carreraId = carrera.value;
+        const semestreVal = semestre.value;
+
+        if (!carreraId || !semestreVal) {
+            materia.innerHTML = '<option value="">-- Primero seleccione carrera y semestre --</option>';
+            materia.disabled = true;
+            materiaHelp.textContent = 'La materia se cargará según la carrera y el semestre.';
             return;
         }
-        
-        // Mostrar loading
-        materiaSelect.innerHTML = '<option value="">Cargando materias...</option>';
-        materiaSelect.disabled = true;
+
+        materia.innerHTML = '<option value="">Cargando materias...</option>';
+        materia.disabled = true;
         materiaHelp.textContent = 'Cargando materias...';
-        
-        // Hacer petición AJAX
-        fetch(`/evaluaciones/carreras/${carreraId}/materias/`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    materiaSelect.innerHTML = '<option value="">Error al cargar materias</option>';
-                    materiaHelp.textContent = 'Error: ' + data.error;
-                    return;
-                }
-                
-                if (data.materias.length === 0) {
-                    materiaSelect.innerHTML = '<option value="">No hay materias disponibles para esta carrera</option>';
-                    materiaHelp.textContent = 'No se encontraron materias para esta carrera';
-                    return;
-                }
-                
-                // Llenar el select con las materias
-                materiaSelect.innerHTML = '<option value="">-- Seleccione materia --</option>';
-                data.materias.forEach(materia => {
-                    const option = document.createElement('option');
-                    option.value = materia.id;
-                    option.textContent = `${materia.nombre} (Semestre ${materia.semestre})`;
-                    if (materia.codigo && materia.codigo !== 'N/A') {
-                        option.textContent += ` - ${materia.codigo}`;
-                    }
-                    materiaSelect.appendChild(option);
-                });
-                
-                materiaSelect.disabled = false;
-                materiaHelp.textContent = `Se encontraron ${data.materias.length} materias para esta carrera`;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                materiaSelect.innerHTML = '<option value="">Error al cargar materias</option>';
-                materiaHelp.textContent = 'Error de conexión al cargar las materias';
+
+        const urlBase = "{% url 'obtener_materias_por_carrera' 0 %}";
+        const url = urlBase.replace('/0/', `/${carreraId}/`) + `?semestre=${encodeURIComponent(semestreVal)}`;
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (!response.ok || data.error) {
+                throw new Error(data.error || 'Error al cargar materias');
+            }
+
+            materia.innerHTML = '<option value="">-- Seleccione materia --</option>';
+
+            if (!data.materias.length) {
+                materia.innerHTML = '<option value="">No hay materias para ese semestre</option>';
+                materiaHelp.textContent = 'No se encontraron materias activas para la carrera y semestre seleccionados.';
+                return;
+            }
+
+            data.materias.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = `${item.codigo} - ${item.nombre}`;
+                option.dataset.codigo = item.codigo;
+                option.dataset.horas = item.horas;
+                materia.appendChild(option);
             });
+
+            materia.disabled = false;
+            materiaHelp.textContent = `Se encontraron ${data.materias.length} materias.`;
+        } catch (error) {
+            materia.innerHTML = '<option value="">Error al cargar materias</option>';
+            materiaHelp.textContent = error.message;
+        }
     }
-    
-    // Event listener para cambio de carrera
-    carreraSelect.addEventListener('change', function() {
-        cargarMaterias(this.value);
+
+    async function cargarPreview() {
+        resetPreview();
+
+        if (!carrera.value || !semestre.value || !materia.value || !turno.value || !cicloEscolar.value) {
+            alert('Debes seleccionar carrera, semestre, materia, turno y ciclo escolar antes de cargar la vista previa.');
+            return;
+        }
+
+        const params = new URLSearchParams({
+            carrera: carrera.value,
+            semestre: semestre.value,
+            materia: materia.value,
+            turno: turno.value,
+            ciclo_escolar: cicloEscolar.value
+        });
+
+        try {
+            const response = await fetch("{% url 'acta_preview_data' %}?" + params.toString());
+            const data = await response.json();
+
+            if (!response.ok || data.error) {
+                throw new Error(data.error || 'Error al cargar la vista previa.');
+            }
+
+            previewCarreraCodigo.value = data.carrera.codigo;
+            previewPlan.value = data.carrera.plan;
+            previewMateriaCodigo.value = data.materia.codigo;
+            previewTotalHoras.value = data.materia.horas;
+
+            previewBody.innerHTML = '';
+
+            if (!data.alumnos.length) {
+                previewBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">No se encontraron alumnos para la selección realizada.</td>
+                    </tr>
+                `;
+                previewWrapper.classList.remove('d-none');
+                return;
+            }
+
+            data.alumnos.forEach((alumno, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${alumno.codigo_alumno ?? ''}</td>
+                    <td>${alumno.matricula ?? ''}</td>
+                    <td>${alumno.nombre_completo ?? ''}</td>
+                    <td>${alumno.unidad_1 ?? 'N/A'}</td>
+                    <td>${alumno.unidad_2 ?? 'N/A'}</td>
+                    <td>${alumno.evidencia_final ?? 'N/A'}</td>
+                    <td style="min-width: 130px;">
+                        <input
+                            type="number"
+                            class="form-control"
+                            name="inasistencias_${alumno.alumno_id}"
+                            min="0"
+                            max="${data.materia.horas}"
+                            value="0"
+                            required
+                        >
+                    </td>
+                `;
+                previewBody.appendChild(row);
+            });
+
+            previewWrapper.classList.remove('d-none');
+            btnSubmit.disabled = false;
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
+    carrera.addEventListener('change', cargarMaterias);
+    semestre.addEventListener('input', cargarMaterias);
+
+    [materia, turno, cicloEscolar].forEach(el => {
+        el.addEventListener('change', resetPreview);
+        el.addEventListener('input', resetPreview);
     });
-    
-    // Inicializar estado del select de materias
-    cargarMaterias(carreraSelect.value);
+
+    btnPreview.addEventListener('click', cargarPreview);
 });
 </script>
 {% endblock %}

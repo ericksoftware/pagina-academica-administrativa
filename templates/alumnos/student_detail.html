@@ -111,55 +111,53 @@
                 </div>
             </div>
 
-            <!-- Calificaciones por Unidad -->
+            <!-- Calificaciones por Materia -->
             <div class="card">
                 <div class="card-header bg-primary-custom text-white d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-bar me-2"></i>Calificaciones por Unidad
-                        <span class="badge bg-light text-dark ms-2">{{ calificaciones.count }}</span>
+                        <i class="fas fa-chart-bar me-2"></i>Calificaciones por Materia
+                        <span class="badge bg-light text-dark ms-2">{{ resumen_materias|length }}</span>
                     </h5>
-                    <small>Total: {{ calificaciones.count }}</small>
+                    <small>Total: {{ resumen_materias|length }}</small>
                 </div>
                 <div class="card-body p-0">
-                    {% if calificaciones %}
+                    {% if resumen_materias %}
                         <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                             <table class="table table-striped table-hover mb-0">
                                 <thead class="sticky-top bg-light">
                                     <tr>
-                                        <th style="position: sticky; top: 0; background: #f8f9fa;">Unidad</th>
                                         <th style="position: sticky; top: 0; background: #f8f9fa;">Materia</th>
+                                        <th style="position: sticky; top: 0; background: #f8f9fa;">Código Unidad</th>
                                         <th style="position: sticky; top: 0; background: #f8f9fa;">Semestre</th>
                                         <th style="position: sticky; top: 0; background: #f8f9fa;">Calificación</th>
                                         <th style="position: sticky; top: 0; background: #f8f9fa;">Fecha</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for calificacion in calificaciones %}
+                                    {% for item in resumen_materias %}
                                     <tr>
-                                        <td>{{ calificacion.unidad.codigo }}</td>
+                                        <td>{{ item.materia.nombre }}</td>
+                                        <td>{{ item.unidad.codigo }}</td>
+                                        <td>{{ item.materia.semestre }}</td>
                                         <td>
-                                            {% if calificacion.unidad.materias.exists %}
-                                                {{ calificacion.unidad.materias.first.nombre }}
-                                            {% else %}
-                                                <span class="text-muted">Sin materia</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if calificacion.unidad.materias.exists %}
-                                                {{ calificacion.unidad.materias.first.semestre }}
+                                            {% if item.promedio is not None %}
+                                                <span class="badge
+                                                    {% if item.promedio >= 8 %}bg-success
+                                                    {% elif item.promedio >= 6 %}bg-warning
+                                                    {% else %}bg-danger{% endif %}">
+                                                    {{ item.promedio }}
+                                                </span>
                                             {% else %}
                                                 <span class="text-muted">N/A</span>
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <span class="badge 
-                                                {% if calificacion.calificacion >= 8 %}bg-success
-                                                {% elif calificacion.calificacion >= 6 %}bg-warning
-                                                {% else %}bg-danger{% endif %}">
-                                                {{ calificacion.calificacion|default:"N/A" }}
-                                            </span>
+                                            {% if item.fecha %}
+                                                {{ item.fecha|date:"d/m/Y" }}
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
                                         </td>
-                                        <td>{{ calificacion.fecha_registro|date:"d/m/Y" }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -169,7 +167,7 @@
                         <div class="text-center py-4">
                             <p class="text-muted mb-0">
                                 <i class="fas fa-info-circle me-2"></i>
-                                No hay calificaciones registradas para este alumno.
+                                No hay materias registradas para este alumno.
                             </p>
                         </div>
                     {% endif %}
@@ -250,87 +248,81 @@
 </div>
 
 <div class="modal fade" id="calificacionesModal" tabindex="-1" aria-labelledby="calificacionesModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" style="max-width: 900px;">
+    <div class="modal-dialog modal-xl" style="max-width: 1400px;">
         <div class="modal-content">
             <div class="modal-header bg-primary-custom text-white">
                 <h5 class="modal-title" id="calificacionesModalLabel">
                     <i class="fas fa-edit me-2"></i>
-                    Calificaciones por Unidad - {{ alumno.nombre_completo }}
+                    Editar Calificaciones - {{ alumno.nombre_completo }}
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+
             <form method="post" action="{% url 'student_update_grades' alumno.id %}">
                 {% csrf_token %}
                 <div class="modal-body">
-                    
-                    <!-- Tabla con altura fija y scroll -->
                     <div class="table-responsive" style="max-height: 550px; overflow-y: auto;">
-                        <table class="table table-striped table-hover">
+                        <table class="table table-striped table-hover align-middle">
                             <thead class="table-dark sticky-top">
                                 <tr>
-                                    <th width="15%" style="position: sticky; top: 0; background: #343a40;">Código Unidad</th>
-                                    <th width="25%" style="position: sticky; top: 0; background: #343a40;">Materia</th>
-                                    <th width="10%" style="position: sticky; top: 0; background: #343a40;">Semestre</th>
-                                    <th width="20%" style="position: sticky; top: 0; background: #343a40;">Calificación</th>
+                                    <th style="position: sticky; top: 0; background: #343a40;">Materia</th>
+                                    <th style="position: sticky; top: 0; background: #343a40;">Código Unidad</th>
+                                    <th style="position: sticky; top: 0; background: #343a40;">Semestre</th>
+
+                                    {% for n in max_parciales_range %}
+                                    <th style="position: sticky; top: 0; background: #343a40;">Parcial {{ n }}</th>
+                                    {% endfor %}
+
+                                    <th style="position: sticky; top: 0; background: #343a40;">Evidencia Final</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% if unidades_carrera %}
-                                    {% for unidad in unidades_carrera %}
+                                {% if materias_modal %}
+                                    {% for item in materias_modal %}
                                     <tr>
-                                        <td>
-                                            <strong>{{ unidad.codigo }}</strong>
-                                        </td>
-                                        <td>
-                                            {% if unidad.materias.exists %}
-                                                {{ unidad.materias.first.nombre }}
-                                            {% else %}
-                                                <span class="text-muted">Sin materia asignada</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if unidad.materias.exists %}
-                                                {{ unidad.materias.first.semestre }}
-                                            {% else %}
-                                                <span class="text-muted">N/A</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <!-- Buscar calificación existente para esta unidad -->
-                                            {% with calificacion_existente=calificaciones|dictsort:"unidad.id" %}
-                                            {% for calificacion in calificacion_existente %}
-                                                {% if calificacion.unidad.id == unidad.id %}
-                                                    <input type="number" 
-                                                           name="calificacion_{{ unidad.id }}" 
-                                                           class="form-control calificacion-input" 
-                                                           min="0" 
-                                                           max="10" 
-                                                           step="0.1"
-                                                           value="{{ calificacion.calificacion }}"
-                                                           placeholder="N/A">
+                                        <td>{{ item.materia.nombre }}</td>
+                                        <td><strong>{{ item.unidad.codigo }}</strong></td>
+                                        <td>{{ item.materia.semestre }}</td>
+
+                                        {% for parcial in item.parciales_render %}
+                                            <td>
+                                                {% if parcial.habilitado %}
+                                                    <input
+                                                        type="number"
+                                                        name="nota__{{ item.unidad.id }}__parcial__{{ parcial.numero }}"
+                                                        class="form-control calificacion-input"
+                                                        min="0"
+                                                        max="10"
+                                                        step="0.1"
+                                                        value="{{ parcial.valor }}"
+                                                        placeholder="N/A"
+                                                    >
+                                                {% else %}
+                                                    <span class="text-muted">—</span>
                                                 {% endif %}
-                                            {% endfor %}
-                                            <!-- Si no se encontró calificación, mostrar campo vacío -->
-                                            {% if not calificacion_existente or not calificacion_existente|dictsort:"unidad.id" %}
-                                                <input type="number" 
-                                                       name="calificacion_{{ unidad.id }}" 
-                                                       class="form-control calificacion-input" 
-                                                       min="0" 
-                                                       max="10" 
-                                                       step="0.1"
-                                                       value=""
-                                                       placeholder="N/A">
-                                            {% endif %}
-                                            {% endwith %}
+                                            </td>
+                                        {% endfor %}
+
+                                        <td>
+                                            <input
+                                                type="number"
+                                                name="nota__{{ item.unidad.id }}__evidencia_final"
+                                                class="form-control calificacion-input"
+                                                min="0"
+                                                max="10"
+                                                step="0.1"
+                                                value="{{ item.evidencia_final }}"
+                                                placeholder="N/A"
+                                            >
                                         </td>
                                     </tr>
                                     {% endfor %}
                                 {% else %}
                                     <tr>
-                                        <td colspan="4" class="text-center py-4">
+                                        <td colspan="100%" class="text-center py-4">
                                             <div class="text-muted">
                                                 <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
-                                                <p>No hay unidades registradas para esta carrera.</p>
+                                                <p>No hay materias registradas para esta carrera.</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -339,29 +331,24 @@
                         </table>
                     </div>
 
-                    <!-- Información adicional -->
                     <div class="card mt-3">
                         <div class="card-header bg-info text-white">
                             <h6 class="card-title mb-0">
                                 <i class="fas fa-info-circle me-1"></i>
-                                Información de Calificaciones por Unidad
+                                Resumen de Captura
                             </h6>
                         </div>
                         <div class="card-body">
                             <div class="row text-center">
-                                <div class="col-md-3">
-                                    <small class="text-muted">Total Unidades</small>
-                                    <div><strong>{{ unidades_carrera|length }}</strong></div>
+                                <div class="col-md-4">
+                                    <small class="text-muted">Materias</small>
+                                    <div><strong>{{ materias_carrera|length }}</strong></div>
                                 </div>
-                                <div class="col-md-3">
-                                    <small class="text-muted">Calificadas</small>
+                                <div class="col-md-4">
+                                    <small class="text-muted">Componentes capturados</small>
                                     <div><strong>{{ materias_calificadas }}</strong></div>
                                 </div>
-                                <div class="col-md-3">
-                                    <small class="text-muted">Por Calificar</small>
-                                    <div><strong>{{ materias_por_calificar }}</strong></div>
-                                </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <small class="text-muted">Promedio</small>
                                     <div><strong>{{ promedio_general|default:"N/A" }}</strong></div>
                                 </div>
@@ -369,6 +356,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="fas fa-times me-1"></i>Cancelar

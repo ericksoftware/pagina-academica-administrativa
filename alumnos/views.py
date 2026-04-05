@@ -4,13 +4,14 @@ from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.core.paginator import Paginator
 from django.db.models import Q
-from core.decorators import control_escolar_required
+from core.decorators import control_escolar_or_directivo_required
 from .models import Alumno
 from evaluaciones.models import Carrera, Calificacion, Materia, Unidad
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
+from decimal import Decimal, InvalidOperation
 
-@control_escolar_required
+@control_escolar_or_directivo_required
 def student_list(request):
     """Lista de todos los alumnos - Solo control escolar"""
     alumnos = Alumno.objects.all().order_by('grupo', 'apellido_paterno', 'apellido_materno', 'nombre')
@@ -55,58 +56,124 @@ def student_list(request):
     }
     return render(request, 'alumnos/student_list.html', context)
 
-@control_escolar_required
+@control_escolar_or_directivo_required
 def student_detail(request, student_id):
     """Detalle de un alumno específico - Solo control escolar"""
     alumno = get_object_or_404(Alumno, id=student_id)
-    calificaciones = Calificacion.objects.filter(alumno=alumno).select_related('unidad', 'unidad__carrera')
-    
-    # DEBUG: Verificar calificaciones cargadas
-    print(f"🔍 DEBUG STUDENT_DETAIL - Alumno: {alumno.nombre_completo()}")
-    print(f"🔍 DEBUG STUDENT_DETAIL - Calificaciones cargadas: {calificaciones.count()}")
-    for calif in calificaciones:
-        print(f"🔍 DEBUG STUDENT_DETAIL - {calif.unidad.codigo}: {calif.calificacion}")
-    
-    # Obtener unidades de la carrera del alumno
-    unidades_carrera = []
+
     materias_carrera = []
-    materias_calificadas = 0
-    materias_por_calificar = 0
+    materias_modal = []
+    resumen_materias = []
+    max_parciales = 0
+    componentes_capturados = 0
+    componentes_totales = 0
     promedio_general = None
-    
+
+    calificaciones = Calificacion.objects.filter(
+        alumno=alumno
+    ).select_related(
+        'unidad',
+        'unidad__carrera',
+        'unidad__materia'
+    ).order_by(
+        'unidad__materia__semestre',
+        'unidad__codigo',
+        'tipo_calificacion',
+        'numero_parcial'
+    )
+
     if alumno.carrera:
-        # Obtener TODAS las unidades de la carrera
-        unidades_carrera = Unidad.objects.filter(
-            carrera=alumno.carrera
-        ).prefetch_related('materias').order_by('numero')
-        
-        # Obtener TODAS las materias de la carrera (para mostrar en el modal)
         materias_carrera = Materia.objects.filter(
-            carrera=alumno.carrera
-        ).prefetch_related('unidades').order_by('semestre', 'nombre')
-        
-        # Calcular estadísticas por UNIDADES
-        materias_calificadas = calificaciones.count()
-        materias_por_calificar = unidades_carrera.count() - materias_calificadas
-        
-        # Promedio general (de todas las unidades calificadas)
-        if calificaciones.exists():
-            suma_calificaciones = sum(calif.calificacion for calif in calificaciones if calif.calificacion)
-            promedio_general = round(suma_calificaciones / calificaciones.count(), 2)
-    
+            carrera=alumno.carrera,
+            activa=True
+        ).select_related('unidad').order_by('semestre', 'nombre')
+
+        max_parciales = max((materia.parciales for materia in materias_carrera), default=0)
+
+        mapa_calificaciones = {}
+        for calif in calificaciones:
+            if calif.tipo_calificacion == 'parcial':
+                mapa_calificaciones[(calif.unidad_id, 'parcial', calif.numero_parcial)] = calif
+            elif calif.tipo_calificacion == 'evidencia_final':
+                mapa_calificaciones[(calif.unidad_id, 'evidencia_final', None)] = calif
+
+        valores_globales = []
+
+        for materia in materias_carrera:
+            parciales_render = []
+            valores_materia = []
+
+            for n in range(1, max_parciales + 1):
+                if n <= materia.parciales:
+                    calif = mapa_calificaciones.get((materia.unidad_id, 'parcial', n))
+                    valor = calif.calificacion if calif else ''
+                    parciales_render.append({
+                        'habilitado': True,
+                        'numero': n,
+                        'valor': valor
+                    })
+                    if calif and calif.calificacion is not None:
+                        valores_materia.append(float(calif.calificacion))
+                        valores_globales.append(float(calif.calificacion))
+                else:
+                    parciales_render.append({
+                        'habilitado': False,
+                        'numero': n,
+                        'valor': ''
+                    })
+
+            evidencia = mapa_calificaciones.get((materia.unidad_id, 'evidencia_final', None))
+            evidencia_valor = evidencia.calificacion if evidencia else ''
+
+            if evidencia and evidencia.calificacion is not None:
+                valores_materia.append(float(evidencia.calificacion))
+                valores_globales.append(float(evidencia.calificacion))
+
+            promedio_materia = round(sum(valores_materia) / len(valores_materia), 2) if valores_materia else None
+            ultima_fecha = None
+            if evidencia and evidencia.fecha_registro:
+                ultima_fecha = evidencia.fecha_registro
+            else:
+                fechas = [
+                    mapa_calificaciones[(materia.unidad_id, 'parcial', n)].fecha_registro
+                    for n in range(1, materia.parciales + 1)
+                    if (materia.unidad_id, 'parcial', n) in mapa_calificaciones
+                ]
+                ultima_fecha = max(fechas) if fechas else None
+
+            materias_modal.append({
+                'materia': materia,
+                'unidad': materia.unidad,
+                'parciales_render': parciales_render,
+                'evidencia_final': evidencia_valor
+            })
+
+            resumen_materias.append({
+                'materia': materia,
+                'unidad': materia.unidad,
+                'promedio': promedio_materia,
+                'fecha': ultima_fecha
+            })
+
+        componentes_totales = sum(materia.parciales + 1 for materia in materias_carrera)
+        componentes_capturados = len(valores_globales)
+        promedio_general = round(sum(valores_globales) / len(valores_globales), 2) if valores_globales else None
+
     context = {
         'alumno': alumno,
         'calificaciones': calificaciones,
-        'unidades_carrera': unidades_carrera,
         'materias_carrera': materias_carrera,
-        'materias_calificadas': materias_calificadas,
-        'materias_por_calificar': materias_por_calificar,
+        'materias_modal': materias_modal,
+        'resumen_materias': resumen_materias,
+        'max_parciales_range': range(1, max_parciales + 1),
+        'materias_calificadas': componentes_capturados,
+        'materias_por_calificar': max(componentes_totales - componentes_capturados, 0),
         'promedio_general': promedio_general,
         'page_title': f'Detalle de {alumno.nombre_completo()}'
     }
     return render(request, 'alumnos/student_detail.html', context)
 
-@control_escolar_required
+@control_escolar_or_directivo_required
 def student_create(request):
     """Crear nuevo alumno - Solo control escolar"""
     carreras = Carrera.objects.all()
@@ -269,7 +336,7 @@ def student_create(request):
     }
     return render(request, 'alumnos/student_form.html', context)
 
-@control_escolar_required
+@control_escolar_or_directivo_required
 def student_edit(request, student_id):
     """Editar alumno existente - Solo control escolar"""
     alumno = get_object_or_404(Alumno, id=student_id)
@@ -409,7 +476,7 @@ def student_edit(request, student_id):
     }
     return render(request, 'alumnos/student_form.html', context)
 
-@control_escolar_required
+@control_escolar_or_directivo_required
 def student_delete(request, student_id):
     """Eliminar alumno - Solo control escolar"""
     alumno = get_object_or_404(Alumno, id=student_id)
@@ -429,71 +496,63 @@ def student_delete(request, student_id):
     }
     return render(request, 'alumnos/student_confirm_delete.html', context)
 
-@control_escolar_required
+@control_escolar_or_directivo_required
 def student_update_grades(request, student_id):
-    """Actualizar calificaciones del alumno por UNIDAD - Solo control escolar"""
     alumno = get_object_or_404(Alumno, id=student_id)
-    
+
     if request.method == 'POST':
         try:
-            print(f"🔍 DEBUG - Procesando calificaciones por UNIDAD para alumno: {alumno.nombre_completo()}")
-            
-            # Obtener TODOS los campos del POST que empiecen con "calificacion_"
-            campos_calificacion = [key for key in request.POST.keys() if key.startswith('calificacion_')]
-            print(f"🔍 DEBUG - Campos encontrados en POST: {len(campos_calificacion)}")
-            
-            for campo in campos_calificacion:
-                # Extraer el ID de la UNIDAD del nombre del campo
-                unidad_id = campo.replace('calificacion_', '')
-                calificacion_valor = request.POST.get(campo, '').strip()
-                
-                print(f"🔍 DEBUG - Procesando: {campo} = '{calificacion_valor}'")
-                
+            periodo = request.POST.get('periodo', f"2025-{alumno.semestre_actual}")
+            campos = [key for key in request.POST.keys() if key.startswith('nota__')]
+
+            for campo in campos:
+                partes = campo.split('__')
+                # nota__unidad_id__parcial__1
+                # nota__unidad_id__evidencia_final
+                if len(partes) < 3:
+                    continue
+
+                unidad_id = int(partes[1])
+                tipo = partes[2]
+                numero_parcial = int(partes[3]) if tipo == 'parcial' and len(partes) == 4 else None
+                valor = request.POST.get(campo, '').strip()
+
+                unidad = Unidad.objects.select_related('materia').get(id=unidad_id, carrera=alumno.carrera)
+                materia = getattr(unidad, 'materia', None)
+
+                if not materia:
+                    continue
+
+                if tipo == 'parcial' and numero_parcial and numero_parcial > materia.parciales:
+                    continue
+
+                filtros = {
+                    'alumno': alumno,
+                    'unidad': unidad,
+                    'periodo': periodo,
+                    'tipo_calificacion': tipo,
+                    'numero_parcial': numero_parcial if tipo == 'parcial' else None,
+                }
+
+                if not valor or valor.lower() == 'n/a':
+                    Calificacion.objects.filter(**filtros).delete()
+                    continue
+
                 try:
-                    unidad = Unidad.objects.get(id=unidad_id)
-                    
-                    # Si el campo está vacío o es "N/A", eliminar la calificación existente
-                    if not calificacion_valor or calificacion_valor.lower() == 'n/a':
-                        deleted_count, _ = Calificacion.objects.filter(
-                            alumno=alumno, 
-                            unidad=unidad
-                        ).delete()
-                        print(f"🔍 DEBUG - Calificación eliminada para {unidad.codigo}: {deleted_count}")
-                    else:
-                        # Convertir a decimal y guardar/actualizar
-                        calificacion_decimal = float(calificacion_valor)
-                        
-                        # Crear o actualizar calificación por UNIDAD
-                        calificacion, created = Calificacion.objects.update_or_create(
-                            alumno=alumno,
-                            unidad=unidad,
-                            defaults={
-                                'calificacion': calificacion_decimal,
-                                'periodo': f"2025-{alumno.semestre_actual}"
-                            }
-                        )
-                        
-                        print(f"🔍 DEBUG - Calificación {'CREADA' if created else 'ACTUALIZADA'} para {unidad.codigo}: {calificacion.calificacion}")
-                        
-                except Unidad.DoesNotExist:
-                    print(f"❌ ERROR - Unidad con ID {unidad_id} no existe")
+                    calificacion_decimal = Decimal(valor)
+                except InvalidOperation:
                     continue
-                except ValueError as e:
-                    print(f"❌ ERROR en valor: {e}")
-                    continue
-            
-            # VERIFICAR DESPUÉS DE GUARDAR
-            calificaciones_despues = Calificacion.objects.filter(alumno=alumno)
-            print(f"🔍 DEBUG - Calificaciones después de guardar: {calificaciones_despues.count()}")
-            for calif in calificaciones_despues:
-                print(f"🔍 DEBUG - Calificación guardada: {calif.unidad.codigo} = {calif.calificacion}")
-            
+
+                Calificacion.objects.update_or_create(
+                    **filtros,
+                    defaults={
+                        'calificacion': calificacion_decimal,
+                    }
+                )
+
             messages.success(request, f'Calificaciones de {alumno.nombre_completo()} actualizadas exitosamente')
-            
+
         except Exception as e:
-            print(f"❌ ERROR general: {e}")
-            import traceback
-            traceback.print_exc()
             messages.error(request, f'Error al actualizar las calificaciones: {str(e)}')
-    
+
     return redirect('student_detail', student_id=student_id)

@@ -5,7 +5,6 @@
 
 {% block content %}
 <div class="container py-4">
-    <!-- Header mejorado -->
     <div class="row mb-5">
         <div class="col-12">
             <div class="d-flex align-items-center mb-3">
@@ -17,176 +16,178 @@
                     <p class="lead mb-0">Bienvenido/a, {{ user.get_full_name|default:user.username }}</p>
                 </div>
             </div>
+
             <span class="badge px-3 py-2 bg-{% if user.tipo_usuario == 'control_escolar' %}primary-custom{% elif user.tipo_usuario == 'docente' %}info{% elif user.tipo_usuario == 'directivo' %}warning{% else %}secondary{% endif %}">
                 <i class="fas fa-user-tag me-1"></i>{{ user.get_tipo_usuario_display }}
             </span>
         </div>
     </div>
-    
-    <!-- Módulos del dashboard -->
+
     <div class="row g-4">
-        <!-- Módulo de Alumnos -->
-        <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2">
-            {% if user.tipo_usuario == 'control_escolar' %}
-            <a href="{% url 'student_list' %}" class="card-module-link">
-            {% endif %}
-                <div class="card card-module h-100 text-center border-0 {% if user.tipo_usuario != 'control_escolar' %}module-disabled{% endif %}">
-                    <div class="card-header bg-primary-custom text-white py-4 position-relative">
-                        <div class="module-icon-wrapper">
-                            <i class="fas fa-users fa-2x"></i>
+        {% if user.tipo_usuario == 'control_escolar' or user.tipo_usuario == 'directivo' %}
+            <!-- Alumnos -->
+            <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2">
+                <a href="{% url 'student_list' %}" class="card-module-link">
+                    <div class="card card-module h-100 text-center border-0">
+                        <div class="card-header bg-primary-custom text-white py-4 position-relative">
+                            <div class="module-icon-wrapper">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                            <div class="hover-effect"></div>
                         </div>
-                        <div class="hover-effect"></div>
-                    </div>
-                    <div class="card-body p-4 pt-5">
-                        <h3 class="h5 card-title text-primary-custom fw-bold mb-2">Alumnos</h3>
-                        <p class="card-text small text-muted">{% if user.tipo_usuario == 'control_escolar' %}Gestiona{% else %}Consulta{% endif %} la información de alumnos del sistema.</p>
-                    </div>
-                    <div class="card-footer bg-transparent border-0 pb-3 pt-0">
-                        {% if user.tipo_usuario == 'control_escolar' %}
-                        <span class="btn btn-secondary-custom btn-sm px-3">
-                            Gestionar <i class="fas fa-arrow-right ms-2"></i>
-                        </span>
-                        {% else %}
-                        <span class="badge bg-secondary py-2 px-3">
-                            <i class="fas fa-lock me-1"></i>Solo Control Escolar
-                        </span>
-                        {% endif %}
-                    </div>
-                </div>
-            </a>
-        </div>
-        
-        <!-- Módulo de Constancias -->
-        <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2">
-            {% if user.tipo_usuario == 'control_escolar' %}
-            <a href="{% url 'certificate_list' %}" class="card-module-link">
-            {% endif %}
-                <div class="card card-module h-100 text-center border-0 {% if user.tipo_usuario != 'control_escolar' %}module-disabled{% endif %}">
-                    <div class="card-header bg-secondary-custom text-white py-4 position-relative">
-                        <div class="module-icon-wrapper">
-                            <i class="fas fa-clipboard fa-2x"></i>
+                        <div class="card-body p-4 pt-5">
+                            <h3 class="h5 card-title text-primary-custom fw-bold mb-2">Alumnos</h3>
+                            <p class="card-text small text-muted">Gestiona la información de alumnos del sistema.</p>
                         </div>
-                        <div class="hover-effect"></div>
-                    </div>
-                    <div class="card-body p-4 pt-5">
-                        <h3 class="h5 card-title text-secondary-custom fw-bold mb-2">Constancias de Estudios</h3>
-                        <p class="card-text small text-muted">{% if user.tipo_usuario == 'control_escolar' %}Genera y gestiona{% else %}Consulta{% endif %} constancias de estudios.</p>
-                    </div>
-                    <div class="card-footer bg-transparent border-0 pb-3 pt-0">
-                        {% if user.tipo_usuario == 'control_escolar' %}
-                        <span class="btn btn-secondary-custom btn-sm px-3">
-                            Gestionar <i class="fas fa-arrow-right ms-2"></i>
-                        </span>
-                        {% else %}
-                        <span class="badge bg-secondary py-2 px-3">
-                            <i class="fas fa-lock me-1"></i>Solo Control Escolar
-                        </span>
-                        {% endif %}
-                    </div>
-                </div>
-            {% if user.tipo_usuario == 'control_escolar' %}
-            </a>
-            {% endif %}
-        </div>
-        
-        <!-- Módulo de Actas de Evaluación -->
-        <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2">
-            {% if user.tipo_usuario == 'control_escolar' %}
-            <a href="{% url 'acta_list' %}" class="card-module-link">  
-            {% endif %}
-                <div class="card card-module h-100 text-center border-0 {% if user.tipo_usuario != 'control_escolar' %}module-disabled{% endif %}">
-                    <div class="card-header bg-info text-white py-4 position-relative">
-                        <div class="module-icon-wrapper">
-                            <i class="fas fa-clipboard-list fa-2x"></i>
+                        <div class="card-footer bg-transparent border-0 pb-3 pt-0">
+                            <span class="btn btn-secondary-custom btn-sm px-3">
+                                Abrir módulo <i class="fas fa-arrow-right ms-2"></i>
+                            </span>
                         </div>
-                        <div class="hover-effect"></div>
                     </div>
-                    <div class="card-body p-4 pt-5">
-                        <h3 class="h5 card-title text-info fw-bold mb-2">Actas de Evaluación</h3>
-                        <p class="card-text small text-muted">{% if user.tipo_usuario == 'control_escolar' %}Genera y gestiona{% else %}Consulta{% endif %} actas de evaluación.</p>
-                    </div>
-                    <div class="card-footer bg-transparent border-0 pb-3 pt-0">
-                        {% if user.tipo_usuario == 'control_escolar' %}
-                        <span class="btn btn-info text-white btn-sm px-3">
-                            Gestionar <i class="fas fa-arrow-right ms-2"></i>
-                        </span>
-                        {% else %}
-                        <span class="badge bg-secondary py-2 px-3">
-                            <i class="fas fa-lock me-1"></i>Solo Control Escolar
-                        </span>
-                        {% endif %}
-                    </div>
-                </div>
-            {% if user.tipo_usuario == 'control_escolar' %}
-            </a>
-            {% endif %}
-        </div>
+                </a>
+            </div>
 
-        <!-- Módulo de Licenciaturas -->
-        <!-- En el módulo de Licenciaturas, cambiar a Carreras -->
-        <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2">
-            {% if user.tipo_usuario == 'control_escolar' %}
-            <a href="{% url 'lista_carreras' %}" class="card-module-link">
-            {% endif %}
-                <div class="card card-module h-100 text-center border-0 {% if user.tipo_usuario != 'control_escolar' %}module-disabled{% endif %}">
-                    <div class="card-header bg-success text-white py-4 position-relative">
-                        <div class="module-icon-wrapper">
-                            <i class="fas fa-university fa-2x"></i>
+            <!-- Constancias -->
+            <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2">
+                <a href="{% url 'certificate_list' %}" class="card-module-link">
+                    <div class="card card-module h-100 text-center border-0">
+                        <div class="card-header bg-secondary-custom text-white py-4 position-relative">
+                            <div class="module-icon-wrapper">
+                                <i class="fas fa-clipboard fa-2x"></i>
+                            </div>
+                            <div class="hover-effect"></div>
                         </div>
-                        <div class="hover-effect"></div>
+                        <div class="card-body p-4 pt-5">
+                            <h3 class="h5 card-title text-secondary-custom fw-bold mb-2">Constancias de Estudios</h3>
+                            <p class="card-text small text-muted">Genera y gestiona constancias de estudios.</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 pb-3 pt-0">
+                            <span class="btn btn-secondary-custom btn-sm px-3">
+                                Abrir módulo <i class="fas fa-arrow-right ms-2"></i>
+                            </span>
+                        </div>
                     </div>
-                    <div class="card-body p-4 pt-5">
-                        <h3 class="h5 card-title text-success fw-bold mb-2">Carreras</h3>
-                        <p class="card-text small text-muted">{% if user.tipo_usuario == 'control_escolar' %}Gestiona{% else %}Consulta{% endif %} las carreras del sistema.</p>
-                    </div>
-                    <div class="card-footer bg-transparent border-0 pb-3 pt-0">
-                        {% if user.tipo_usuario == 'control_escolar' %}
-                        <span class="btn btn-success btn-sm px-3">
-                            Gestionar <i class="fas fa-arrow-right ms-2"></i>
-                        </span>
-                        {% else %}
-                        <span class="badge bg-secondary py-2 px-3">
-                            <i class="fas fa-lock me-1"></i>Solo Control Escolar
-                        </span>
-                        {% endif %}
-                    </div>
-                </div>
-            {% if user.tipo_usuario == 'control_escolar' %}
-            </a>
-            {% endif %}
-        </div>
+                </a>
+            </div>
 
-        <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2">
-            {% if user.tipo_usuario == 'control_escolar' or user.tipo_usuario == 'directivo' %}
-            <a href="{% url 'user_list' %}" class="card-module-link">
-            {% endif %}
-                <div class="card card-module h-100 text-center border-0 {% if user.tipo_usuario != 'control_escolar' and user.tipo_usuario != 'directivo' %}module-disabled{% endif %}">
-                    <div class="card-header bg-warning text-white py-4 position-relative">
-                        <div class="module-icon-wrapper">
-                            <i class="fas fa-user-cog fa-2x"></i>
+            <!-- Actas -->
+            <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2">
+                <a href="{% url 'acta_list' %}" class="card-module-link">
+                    <div class="card card-module h-100 text-center border-0">
+                        <div class="card-header bg-info text-white py-4 position-relative">
+                            <div class="module-icon-wrapper">
+                                <i class="fas fa-clipboard-list fa-2x"></i>
+                            </div>
+                            <div class="hover-effect"></div>
                         </div>
-                        <div class="hover-effect"></div>
+                        <div class="card-body p-4 pt-5">
+                            <h3 class="h5 card-title text-info fw-bold mb-2">Actas de Evaluación</h3>
+                            <p class="card-text small text-muted">Genera y gestiona actas de evaluación.</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 pb-3 pt-0">
+                            <span class="btn btn-info text-white btn-sm px-3">
+                                Abrir módulo <i class="fas fa-arrow-right ms-2"></i>
+                            </span>
+                        </div>
                     </div>
-                    <div class="card-body p-4 pt-5">
-                        <h3 class="h5 card-title text-warning fw-bold mb-2">Usuarios</h3>
-                        <p class="card-text small text-muted">{% if user.tipo_usuario == 'control_escolar' or user.tipo_usuario == 'directivo' %}Gestiona{% else %}Consulta{% endif %} los usuarios del sistema.</p>
+                </a>
+            </div>
+
+            <!-- Carreras -->
+            <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2">
+                <a href="{% url 'lista_carreras' %}" class="card-module-link">
+                    <div class="card card-module h-100 text-center border-0">
+                        <div class="card-header bg-success text-white py-4 position-relative">
+                            <div class="module-icon-wrapper">
+                                <i class="fas fa-university fa-2x"></i>
+                            </div>
+                            <div class="hover-effect"></div>
+                        </div>
+                        <div class="card-body p-4 pt-5">
+                            <h3 class="h5 card-title text-success fw-bold mb-2">Carreras</h3>
+                            <p class="card-text small text-muted">Gestiona las carreras del sistema.</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 pb-3 pt-0">
+                            <span class="btn btn-success btn-sm px-3">
+                                Abrir módulo <i class="fas fa-arrow-right ms-2"></i>
+                            </span>
+                        </div>
                     </div>
-                    <div class="card-footer bg-transparent border-0 pb-3 pt-0">
-                        {% if user.tipo_usuario == 'control_escolar' or user.tipo_usuario == 'directivo' %}
-                        <span class="btn btn-warning text-white btn-sm px-3">
-                            Gestionar <i class="fas fa-arrow-right ms-2"></i>
-                        </span>
-                        {% else %}
-                        <span class="badge bg-secondary py-2 px-3">
-                            <i class="fas fa-lock me-1"></i>Solo Administradores
-                        </span>
-                        {% endif %}
+                </a>
+            </div>
+
+            <!-- Usuarios -->
+            <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2">
+                <a href="{% url 'user_list' %}" class="card-module-link">
+                    <div class="card card-module h-100 text-center border-0">
+                        <div class="card-header bg-warning text-white py-4 position-relative">
+                            <div class="module-icon-wrapper">
+                                <i class="fas fa-user-cog fa-2x"></i>
+                            </div>
+                            <div class="hover-effect"></div>
+                        </div>
+                        <div class="card-body p-4 pt-5">
+                            <h3 class="h5 card-title text-warning fw-bold mb-2">Usuarios</h3>
+                            <p class="card-text small text-muted">Gestiona los usuarios del sistema.</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 pb-3 pt-0">
+                            <span class="btn btn-warning text-white btn-sm px-3">
+                                Abrir módulo <i class="fas fa-arrow-right ms-2"></i>
+                            </span>
+                        </div>
                     </div>
-                </div>
-            {% if user.tipo_usuario == 'control_escolar' or user.tipo_usuario == 'directivo' %}
-            </a>
-            {% endif %}
-        </div>
+                </a>
+            </div>
+
+        {% elif user.tipo_usuario == 'alumno' %}
+            <!-- Alumno: solo constancias -->
+            <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2">
+                <a href="{% url 'certificate_list' %}" class="card-module-link">
+                    <div class="card card-module h-100 text-center border-0">
+                        <div class="card-header bg-secondary-custom text-white py-4 position-relative">
+                            <div class="module-icon-wrapper">
+                                <i class="fas fa-clipboard fa-2x"></i>
+                            </div>
+                            <div class="hover-effect"></div>
+                        </div>
+                        <div class="card-body p-4 pt-5">
+                            <h3 class="h5 card-title text-secondary-custom fw-bold mb-2">Constancias de Estudios</h3>
+                            <p class="card-text small text-muted">Consulta y descarga tus constancias de estudios.</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 pb-3 pt-0">
+                            <span class="btn btn-secondary-custom btn-sm px-3">
+                                Entrar <i class="fas fa-arrow-right ms-2"></i>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+        {% elif user.tipo_usuario == 'docente' %}
+            <!-- Docente: solo actas -->
+            <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2">
+                <a href="{% url 'acta_list' %}" class="card-module-link">
+                    <div class="card card-module h-100 text-center border-0">
+                        <div class="card-header bg-info text-white py-4 position-relative">
+                            <div class="module-icon-wrapper">
+                                <i class="fas fa-clipboard-list fa-2x"></i>
+                            </div>
+                            <div class="hover-effect"></div>
+                        </div>
+                        <div class="card-body p-4 pt-5">
+                            <h3 class="h5 card-title text-info fw-bold mb-2">Actas de Evaluación</h3>
+                            <p class="card-text small text-muted">Genera y consulta actas de evaluación.</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 pb-3 pt-0">
+                            <span class="btn btn-info text-white btn-sm px-3">
+                                Entrar <i class="fas fa-arrow-right ms-2"></i>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        {% endif %}
     </div>
 </div>
 
@@ -199,24 +200,24 @@
         cursor: pointer;
         background: white;
     }
-    
+
     .card-module:hover {
         transform: translateY(-8px);
         box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
     }
-    
+
     .card-module .card-header {
         border-bottom: none;
         position: relative;
         overflow: hidden;
     }
-    
+
     .module-icon-wrapper {
         position: relative;
         z-index: 2;
         transition: transform 0.3s ease;
     }
-    
+
     .hover-effect {
         position: absolute;
         top: 0;
@@ -227,70 +228,47 @@
         opacity: 0;
         transition: opacity 0.3s ease;
     }
-    
+
     .card-module:hover .module-icon-wrapper {
         transform: scale(1.1);
     }
-    
+
     .card-module:hover .hover-effect {
         opacity: 1;
     }
-    
+
     .card-module-link {
         text-decoration: none;
         color: inherit;
     }
-    
+
     .card-module-link:hover {
         color: inherit;
     }
-    
-    .module-disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-    
-    .module-disabled:hover {
-        transform: none !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
-    }
-    
-    .module-disabled .module-icon-wrapper,
-    .module-disabled .hover-effect {
-        transition: none;
-    }
-    
-    .module-disabled:hover .module-icon-wrapper {
-        transform: none;
-    }
-    
-    .module-disabled:hover .hover-effect {
-        opacity: 0;
-    }
-    
+
     .badge {
         font-weight: 500;
         letter-spacing: 0.3px;
     }
-    
+
     @media (max-width: 576px) {
         .col-xxl-2 {
             flex: 0 0 auto;
             width: 100%;
         }
-        
+
         .display-6 {
             font-size: 1.8rem;
         }
     }
-    
+
     @media (min-width: 1400px) {
         .col-xxl-2 {
             flex: 0 0 auto;
             width: 20%;
         }
     }
-    
+
     @media (max-width: 1399.98px) and (min-width: 1200px) {
         .col-xxl-2 {
             flex: 0 0 auto;
@@ -298,22 +276,4 @@
         }
     }
 </style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Tooltip para módulos deshabilitados
-        const disabledModules = document.querySelectorAll('.module-disabled');
-        disabledModules.forEach(module => {
-            module.addEventListener('mouseenter', function() {
-                this.setAttribute('title', 'No disponible para tu tipo de usuario');
-            });
-        });
-        
-        // Inicializar tooltips de Bootstrap
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    });
-</script>
 {% endblock %}

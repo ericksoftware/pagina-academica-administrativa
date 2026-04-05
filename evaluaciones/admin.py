@@ -1,6 +1,6 @@
-# evaluaciones/admin.py
 from django.contrib import admin
 from .models import Carrera, Unidad, Materia, Calificacion, PromedioPeriodo, ActaEvaluacion
+
 
 @admin.register(Carrera)
 class CarreraAdmin(admin.ModelAdmin):
@@ -10,49 +10,41 @@ class CarreraAdmin(admin.ModelAdmin):
     list_editable = ['activa']
     ordering = ['id']
 
+
 @admin.register(Unidad)
 class UnidadAdmin(admin.ModelAdmin):
-    list_display = ['codigo', 'carrera', 'numero', 'nombre', 'materia_asignada', 'estado']
-    list_filter = ['carrera']  # QUITAR 'materia' de list_filter
+    list_display = ['codigo', 'carrera', 'numero', 'nombre', 'materia_asignada_admin', 'estado']
+    list_filter = ['carrera']
     search_fields = ['codigo', 'nombre', 'carrera__nombre']
     ordering = ['carrera', 'numero']
-    
-    def materia_asignada(self, obj):
-        """Obtener la materia asignada a esta unidad"""
-        if obj.materias.exists():
-            return obj.materias.first().nombre
-        return "Sin asignar"
-    materia_asignada.short_description = 'Materia Asignada'
-    
+
+    def materia_asignada_admin(self, obj):
+        materia = getattr(obj, 'materia', None)
+        return materia.nombre if materia else 'Sin asignar'
+    materia_asignada_admin.short_description = 'Materia Asignada'
+
     def estado(self, obj):
-        if obj.materias.exists():
-            return "Ocupada"
-        return "Disponible"
+        return 'Ocupada' if getattr(obj, 'materia', None) else 'Disponible'
     estado.short_description = 'Estado'
+
 
 @admin.register(Materia)
 class MateriaAdmin(admin.ModelAdmin):
-    list_display = ['nombre', 'carrera', 'semestre', 'unidades_asignadas', 'creditos', 'horas', 'activa']
-    list_filter = ['carrera', 'semestre', 'activa']
-    search_fields = ['nombre', 'carrera__nombre']
-    filter_horizontal = ['unidades']  # Agregar filter_horizontal para ManyToMany
+    list_display = ['nombre', 'carrera', 'semestre', 'unidad', 'parciales', 'creditos', 'horas', 'activa']
+    list_filter = ['carrera', 'semestre', 'activa', 'parciales']
+    search_fields = ['nombre', 'carrera__nombre', 'unidad__codigo']
     list_editable = ['activa']
     ordering = ['carrera', 'semestre', 'nombre']
-    
-    def unidades_asignadas(self, obj):
-        unidades = obj.unidades.all()
-        if unidades:
-            return ", ".join([unidad.codigo for unidad in unidades])
-        return "Sin unidades"
-    unidades_asignadas.short_description = 'Unidades Asignadas'
+
 
 @admin.register(Calificacion)
 class CalificacionAdmin(admin.ModelAdmin):
-    list_display = ['alumno', 'unidad', 'calificacion', 'periodo', 'fecha_registro']  # CAMBIAR: materia por unidad
-    list_filter = ['periodo', 'unidad__carrera']  # CAMBIAR: filtros por unidad
-    search_fields = ['alumno__matricula', 'alumno__nombre', 'unidad__codigo']  # CAMBIAR: buscar por unidad
+    list_display = ['alumno', 'unidad', 'tipo_calificacion', 'calificacion', 'periodo', 'fecha_registro']
+    list_filter = ['periodo', 'tipo_calificacion', 'unidad__carrera']
+    search_fields = ['alumno__matricula', 'alumno__nombre', 'unidad__codigo']
     readonly_fields = ['fecha_registro', 'fecha_actualizacion']
     ordering = ['-fecha_registro']
+
 
 @admin.register(PromedioPeriodo)
 class PromedioPeriodoAdmin(admin.ModelAdmin):
@@ -62,10 +54,30 @@ class PromedioPeriodoAdmin(admin.ModelAdmin):
     readonly_fields = ['fecha_calculo']
     ordering = ['alumno', 'periodo']
 
+
 @admin.register(ActaEvaluacion)
 class ActaEvaluacionAdmin(admin.ModelAdmin):
-    list_display = ['materia', 'carrera', 'semestre', 'grupo', 'periodo', 'estado', 'fecha_generacion']
-    list_filter = ['carrera', 'semestre', 'estado', 'periodo']
-    search_fields = ['materia__nombre', 'grupo']
+    list_display = [
+        'id',
+        'materia',
+        'carrera',
+        'semestre',
+        'grupo',
+        'turno',
+        'docente_identificador',
+        'docente_nombre',
+        'periodo',
+        'estado',
+        'fecha_generacion',
+    ]
+    list_filter = ['carrera', 'semestre', 'estado', 'periodo', 'turno']
+    search_fields = [
+        'materia__nombre',
+        'carrera__nombre',
+        'grupo',
+        'periodo',
+        'docente_identificador',
+        'docente_nombre',
+    ]
     readonly_fields = ['fecha_generacion']
     ordering = ['-fecha_generacion']

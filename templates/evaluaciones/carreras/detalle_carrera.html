@@ -15,7 +15,7 @@
                     <li class="breadcrumb-item active">Detalle</li>
                 </ol>
             </nav>
-            
+
             <div class="d-flex justify-content-between align-items-center">
                 <h1 class="h2 text-primary-custom">{{ carrera.nombre }}</h1>
                 <div class="btn-group">
@@ -33,7 +33,7 @@
         </div>
     </div>
 
-    <!-- Modal de eliminación -->
+    <!-- Modal de eliminación de carrera -->
     <div class="modal fade" id="eliminarModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -43,7 +43,10 @@
                 </div>
                 <div class="modal-body">
                     ¿Estás seguro de que deseas eliminar la carrera "{{ carrera.nombre }}"?
-                    <br><small class="text-danger">Esta acción no se puede deshacer y eliminará todas las unidades y materias asociadas.</small>
+                    <br>
+                    <small class="text-danger">
+                        Esta acción no se puede deshacer y eliminará todas las unidades y materias asociadas.
+                    </small>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -57,7 +60,7 @@
     </div>
 
     <div class="row">
-        <!-- Información General -->
+        <!-- Información general + agregar materia -->
         <div class="col-md-4 mb-4">
             <div class="card">
                 <div class="card-header bg-primary-custom text-white">
@@ -101,7 +104,7 @@
                 </div>
             </div>
 
-            <!-- Agregar Materia -->
+            <!-- Agregar materia -->
             <div class="card mt-4">
                 <div class="card-header bg-success text-white">
                     <h5 class="card-title mb-0">
@@ -111,11 +114,19 @@
                 <div class="card-body">
                     <form method="post" action="{% url 'agregar_materia' carrera.id %}" id="formAgregarMateria">
                         {% csrf_token %}
+
                         <div class="mb-3">
                             <label for="nombre_materia" class="form-label">Nombre de la Materia *</label>
-                            <input type="text" class="form-control" id="nombre_materia" name="nombre" required
-                                placeholder="Ej: Fundamentos de Educación Inclusiva">
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="nombre_materia"
+                                name="nombre"
+                                required
+                                placeholder="Ej: Fundamentos de Educación Inclusiva"
+                            >
                         </div>
+
                         <div class="mb-3">
                             <label for="semestre_materia" class="form-label">Semestre *</label>
                             <select class="form-select" id="semestre_materia" name="semestre" required>
@@ -125,31 +136,65 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        
-                        <!-- Selector de Unidades con botón + -->
+
                         <div class="mb-3">
-                            <label class="form-label">Unidades *</label>
-                            <div id="unidades-container">
-                                <!-- Aquí se agregarán los selects dinámicamente -->
+                            <label for="unidad_materia" class="form-label">Unidad *</label>
+                            <select class="form-select" id="unidad_materia" name="unidad" required>
+                                <option value="">Seleccionar unidad</option>
+                                {% for unidad in unidades %}
+                                <option value="{{ unidad.id }}" {% if unidad.materia_asignada %}disabled{% endif %}>
+                                    {{ unidad.codigo }} {% if unidad.materia_asignada %}(Ocupada){% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">
+                                Cada unidad solo puede pertenecer a una sola materia.
                             </div>
-                            <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="agregarUnidad()">
-                                <i class="fas fa-plus me-1"></i>Agregar Unidad
-                            </button>
-                            <div class="form-text">Cada unidad solo puede estar asignada a una materia</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="parciales_materia" class="form-label">Número de Parciales *</label>
+                            <input
+                                type="number"
+                                class="form-control"
+                                id="parciales_materia"
+                                name="parciales"
+                                value="3"
+                                min="1"
+                                max="10"
+                                step="1"
+                                required
+                            >
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="creditos_materia" class="form-label">Créditos</label>
-                                <input type="number" class="form-control" id="creditos_materia" name="creditos" 
-                                    value="8.0" step="any" min="0" max="20">
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="creditos_materia"
+                                    name="creditos"
+                                    value="8.0"
+                                    step="any"
+                                    min="0"
+                                    max="20"
+                                >
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="horas_materia" class="form-label">Horas</label>
-                                <input type="number" class="form-control" id="horas_materia" name="horas" 
-                                    value="64" min="1" max="200">
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="horas_materia"
+                                    name="horas"
+                                    value="64"
+                                    min="1"
+                                    max="200"
+                                >
                             </div>
                         </div>
+
                         <button type="submit" class="btn btn-success w-100">
                             <i class="fas fa-save me-2"></i>Agregar Materia
                         </button>
@@ -158,13 +203,13 @@
             </div>
         </div>
 
-        <!-- Unidades y Materias -->
+        <!-- Unidades y materias -->
         <div class="col-md-8">
             <!-- Unidades -->
             <div class="card mb-4" style="height: 335px;">
                 <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-cubes me-2"></i>Unidades 
+                        <i class="fas fa-cubes me-2"></i>Unidades
                         <span class="badge bg-light text-dark ms-2">{{ unidades.count }}</span>
                     </h5>
                 </div>
@@ -186,16 +231,14 @@
                                     <td><strong>{{ unidad.codigo }}</strong></td>
                                     <td>{{ unidad.numero }}</td>
                                     <td>
-                                        {% if unidad.materias.exists %}
-                                            {% with materia=unidad.materias.first %}
-                                            <span class="text-success">{{ materia.nombre }}</span>
-                                            {% endwith %}
+                                        {% if unidad.materia_asignada %}
+                                            <span class="text-success">{{ unidad.materia_asignada.nombre }}</span>
                                         {% else %}
                                             <span class="text-muted">Sin asignar</span>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if unidad.materias.exists %}
+                                        {% if unidad.materia_asignada %}
                                         <span class="badge bg-success">Asignada</span>
                                         {% else %}
                                         <span class="badge bg-secondary">Disponible</span>
@@ -218,7 +261,7 @@
                 </div>
             </div>
 
-            <!-- Materias por Semestre -->
+            <!-- Materias por semestre -->
             <div class="card">
                 <div class="card-header bg-warning text-dark">
                     <h5 class="card-title mb-0">Materias por Semestre</h5>
@@ -228,15 +271,22 @@
                         {% for semestre, materias in materias_por_semestre.items %}
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="heading{{ semestre }}">
-                                <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" 
-                                        type="button" data-bs-toggle="collapse" 
-                                        data-bs-target="#collapse{{ semestre }}">
+                                <button
+                                    class="accordion-button {% if not forloop.first %}collapsed{% endif %}"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapse{{ semestre }}"
+                                >
                                     Semestre {{ semestre }}
                                     <span class="badge bg-primary ms-2">{{ materias|length }} materias</span>
                                 </button>
                             </h2>
-                            <div id="collapse{{ semestre }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" 
-                                 data-bs-parent="#accordionMaterias">
+
+                            <div
+                                id="collapse{{ semestre }}"
+                                class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
+                                data-bs-parent="#accordionMaterias"
+                            >
                                 <div class="accordion-body">
                                     {% if materias %}
                                     <div class="table-responsive">
@@ -244,7 +294,8 @@
                                             <thead>
                                                 <tr>
                                                     <th>Nombre</th>
-                                                    <th>Unidades</th>
+                                                    <th>Unidad</th>
+                                                    <th>Parciales</th>
                                                     <th>Créditos</th>
                                                     <th>Horas</th>
                                                     <th>Estado</th>
@@ -256,12 +307,9 @@
                                                 <tr>
                                                     <td>{{ materia.nombre }}</td>
                                                     <td>
-                                                        {% for unidad in materia.unidades.all %}
-                                                        <span class="badge bg-secondary">{{ unidad.codigo }}</span>
-                                                        {% empty %}
-                                                        <span class="text-muted">Sin unidades</span>
-                                                        {% endfor %}
+                                                        <span class="badge bg-secondary">{{ materia.unidad.codigo }}</span>
                                                     </td>
+                                                    <td>{{ materia.parciales }}</td>
                                                     <td>{{ materia.creditos }}</td>
                                                     <td>{{ materia.horas }}</td>
                                                     <td>
@@ -271,17 +319,21 @@
                                                     </td>
                                                     <td>
                                                         <div class="btn-group btn-group-sm" role="group">
-                                                            <!-- Botón Editar -->
-                                                            <button type="button" class="btn btn-outline-primary" 
-                                                                    onclick="editarMateria({{ materia.id }})"
-                                                                    title="Editar materia">
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-outline-primary"
+                                                                onclick="editarMateria({{ materia.id }})"
+                                                                title="Editar materia"
+                                                            >
                                                                 <i class="fas fa-edit"></i>
                                                             </button>
-                                                            
-                                                            <!-- Botón Eliminar -->
-                                                            <button type="button" class="btn btn-outline-danger" 
-                                                                    onclick="eliminarMateria({{ materia.id }}, '{{ materia.nombre }}')"
-                                                                    title="Eliminar materia">
+
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-outline-danger"
+                                                                onclick="eliminarMateria({{ materia.id }}, '{{ materia.nombre }}')"
+                                                                title="Eliminar materia"
+                                                            >
                                                                 <i class="fas fa-trash"></i>
                                                             </button>
                                                         </div>
@@ -305,7 +357,7 @@
     </div>
 </div>
 
-<!-- Modal para eliminar materia -->
+<!-- Modal eliminar materia -->
 <div class="modal fade" id="eliminarMateriaModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -328,7 +380,7 @@
     </div>
 </div>
 
-<!-- Modal para editar materia -->
+<!-- Modal editar materia -->
 <div class="modal fade" id="editarMateriaModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -336,6 +388,7 @@
                 <h5 class="modal-title">Editar Materia</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+
             <form id="formEditarMateria" method="post">
                 {% csrf_token %}
                 <div class="modal-body">
@@ -343,6 +396,7 @@
                         <label for="edit_nombre_materia" class="form-label">Nombre de la Materia *</label>
                         <input type="text" class="form-control" id="edit_nombre_materia" name="nombre" required>
                     </div>
+
                     <div class="mb-3">
                         <label for="edit_semestre_materia" class="form-label">Semestre *</label>
                         <select class="form-select" id="edit_semestre_materia" name="semestre" required>
@@ -352,31 +406,63 @@
                             {% endfor %}
                         </select>
                     </div>
-                    
-                    <!-- Selector de Unidades para edición -->
+
                     <div class="mb-3">
-                        <label class="form-label">Unidades *</label>
-                        <div id="edit-unidades-container">
-                            <!-- Se llenará dinámicamente -->
-                        </div>
-                        <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="agregarUnidadEdicion()">
-                            <i class="fas fa-plus me-1"></i>Agregar Unidad
-                        </button>
+                        <label for="edit_unidad_materia" class="form-label">Unidad *</label>
+                        <select class="form-select" id="edit_unidad_materia" name="unidad" required>
+                            <option value="">Seleccionar unidad</option>
+                            {% for unidad in unidades %}
+                            <option
+                                value="{{ unidad.id }}"
+                                data-ocupada="{% if unidad.materia_asignada %}1{% else %}0{% endif %}"
+                            >
+                                {{ unidad.codigo }} {% if unidad.materia_asignada %}(Ocupada){% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_parciales_materia" class="form-label">Número de Parciales *</label>
+                        <input
+                            type="number"
+                            class="form-control"
+                            id="edit_parciales_materia"
+                            name="parciales"
+                            value="3"
+                            min="1"
+                            max="10"
+                            step="1"
+                            required
+                        >
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="edit_creditos_materia" class="form-label">Créditos</label>
-                            <input type="number" class="form-control" id="edit_creditos_materia" name="creditos" 
-                                step="any" min="0" max="20">
+                            <input
+                                type="number"
+                                class="form-control"
+                                id="edit_creditos_materia"
+                                name="creditos"
+                                step="any"
+                                min="0"
+                                max="20"
+                            >
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="edit_horas_materia" class="form-label">Horas</label>
-                            <input type="number" class="form-control" id="edit_horas_materia" name="horas" 
-                                min="1" max="200">
+                            <input
+                                type="number"
+                                class="form-control"
+                                id="edit_horas_materia"
+                                name="horas"
+                                min="1"
+                                max="200"
+                            >
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="edit_activa_materia" name="activa">
@@ -384,6 +470,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
@@ -394,180 +481,35 @@
 </div>
 
 <script>
-// Lista de unidades disponibles (para usar en los selects)
-const unidadesDisponibles = [
-    {% for unidad in unidades %}
-    { 
-        id: {{ unidad.id }}, 
-        codigo: "{{ unidad.codigo }}", 
-        disponible: {% if not unidad.materias.exists %}true{% else %}false{% endif %} 
-    },
-    {% endfor %}
-];
-
-let unidadCounter = 0;
-
-function agregarUnidad() {
-    const container = document.getElementById('unidades-container');
-    const selectId = `unidad_${unidadCounter}`;
-    
-    // Crear el HTML con todas las opciones de unidades
-    let optionsHtml = '<option value="">Seleccionar unidad</option>';
-    
-    unidadesDisponibles.forEach(unidad => {
-        const disabled = unidad.disponible === false ? 'disabled' : '';
-        const ocupadaText = unidad.disponible === false ? '(Ocupada)' : '';
-        
-        optionsHtml += `<option value="${unidad.id}" ${disabled}>
-            ${unidad.codigo} ${ocupadaText}
-        </option>`;
-    });
-    
-    const selectGroup = document.createElement('div');
-    selectGroup.className = 'input-group mb-2';
-    selectGroup.innerHTML = `
-        <select class="form-select" id="${selectId}" name="unidades" required>
-            ${optionsHtml}
-        </select>
-        <button type="button" class="btn btn-outline-danger" onclick="removerUnidad(this)">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
-    
-    container.appendChild(selectGroup);
-    unidadCounter++;
-}
-
-function agregarUnidadEdicion() {
-    const container = document.getElementById('edit-unidades-container');
-    const selectId = `edit_unidad_${unidadCounter}`;
-    
-    // Crear el HTML con todas las opciones de unidades
-    let optionsHtml = '<option value="">Seleccionar unidad</option>';
-    
-    unidadesDisponibles.forEach(unidad => {
-        const disabled = unidad.disponible === false ? 'disabled' : '';
-        const ocupadaText = unidad.disponible === false ? '(Ocupada)' : '';
-        
-        optionsHtml += `<option value="${unidad.id}" ${disabled}>
-            ${unidad.codigo} ${ocupadaText}
-        </option>`;
-    });
-    
-    const selectGroup = document.createElement('div');
-    selectGroup.className = 'input-group mb-2';
-    selectGroup.innerHTML = `
-        <select class="form-select" id="${selectId}" name="unidades" required>
-            ${optionsHtml}
-        </select>
-        <button type="button" class="btn btn-outline-danger" onclick="removerUnidad(this)">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
-    
-    container.appendChild(selectGroup);
-    
-    // Actualizar el estado después de agregar
-    setTimeout(() => {
-        actualizarEstadoUnidades();
-    }, 100);
-    
-    unidadCounter++;
-}
-
-function actualizarEstadoUnidades() {
-    const selects = document.querySelectorAll('#edit-unidades-container select, #unidades-container select');
-    selects.forEach(select => {
-        for (let i = 0; i < select.options.length; i++) {
-            const option = select.options[i];
-            const unidadId = parseInt(option.value);
-            
-            if (!unidadId) continue; // Saltar la opción "Seleccionar unidad"
-            
-            // Encontrar la unidad en unidadesDisponibles
-            const unidad = unidadesDisponibles.find(u => u.id === unidadId);
-            if (!unidad) continue;
-            
-            // Si la unidad ya está seleccionada en otro select, deshabilitarla
-            if (unidadesSeleccionadas.includes(unidadId) && !option.selected) {
-                option.disabled = true;
-                if (!option.textContent.includes('(Seleccionada)')) {
-                    option.textContent = unidad.codigo + ' (Seleccionada)';
-                }
-            }
-            
-            // Si la unidad está ocupada y no es la seleccionada actualmente, deshabilitarla
-            if (!unidad.disponible && !option.selected && !unidadesSeleccionadas.includes(unidadId)) {
-                option.disabled = true;
-                if (!option.textContent.includes('(Ocupada)')) {
-                    option.textContent = unidad.codigo + ' (Ocupada)';
-                }
-            }
-            
-            // Si la unidad está disponible y no está seleccionada en otro lugar, habilitarla
-            if (unidad.disponible && !unidadesSeleccionadas.includes(unidadId) && option.disabled) {
-                option.disabled = false;
-                option.textContent = unidad.codigo;
-            }
-        }
-    });
-}
-
-function removerUnidad(button) {
-    const select = button.previousElementSibling;
-    const unidadId = parseInt(select.value);
-    
-    // Remover de unidadesSeleccionadas si existe
-    if (unidadId) {
-        const index = unidadesSeleccionadas.indexOf(unidadId);
-        if (index > -1) {
-            unidadesSeleccionadas.splice(index, 1);
-        }
-    }
-    
-    button.parentElement.remove();
-    actualizarEstadoUnidades();
-}
-
 function eliminarMateria(materiaId, materiaNombre) {
     document.getElementById('materiaNombre').textContent = materiaNombre;
     document.getElementById('formEliminarMateria').action = "{% url 'eliminar_materia' 0 %}".replace('0', materiaId);
     new bootstrap.Modal(document.getElementById('eliminarMateriaModal')).show();
 }
 
-let unidadesSeleccionadas = [];
-
 function editarMateria(materiaId) {
-    // Hacer una petición AJAX para obtener los datos de la materia
     fetch(`/evaluaciones/materia/${materiaId}/datos/`)
         .then(response => response.json())
         .then(data => {
-            // Llenar el formulario con los datos de la materia
             document.getElementById('edit_nombre_materia').value = data.nombre;
             document.getElementById('edit_semestre_materia').value = data.semestre;
+            document.getElementById('edit_unidad_materia').value = data.unidad_id || '';
+            document.getElementById('edit_parciales_materia').value = data.parciales || 3;
             document.getElementById('edit_creditos_materia').value = data.creditos;
             document.getElementById('edit_horas_materia').value = data.horas;
             document.getElementById('edit_activa_materia').checked = data.activa;
-            
-            // Limpiar container de unidades
-            const container = document.getElementById('edit-unidades-container');
-            container.innerHTML = '';
-            
-            // Agregar selects para cada unidad seleccionada
-            unidadesSeleccionadas = data.unidades_ids || [];
-            if (unidadesSeleccionadas.length > 0) {
-                unidadesSeleccionadas.forEach(unidadId => {
-                    agregarUnidadEdicionConValor(unidadId);
-                });
-            } else {
-                // Si no hay unidades, agregar una vacía
-                agregarUnidadEdicion();
-            }
-            
-            // Configurar la acción del formulario
+
+            const selectUnidad = document.getElementById('edit_unidad_materia');
+            const unidadActual = String(data.unidad_id || '');
+
+            Array.from(selectUnidad.options).forEach(option => {
+                if (!option.value) return;
+                const ocupada = option.dataset.ocupada === '1';
+                option.disabled = ocupada && option.value !== unidadActual;
+            });
+
             document.getElementById('formEditarMateria').action = `/evaluaciones/materia/${materiaId}/editar/`;
-            
-            // Mostrar el modal
+
             new bootstrap.Modal(document.getElementById('editarMateriaModal')).show();
         })
         .catch(error => {
@@ -575,55 +517,5 @@ function editarMateria(materiaId) {
             alert('Error al cargar los datos de la materia');
         });
 }
-
-function agregarUnidadEdicionConValor(unidadId) {
-    const container = document.getElementById('edit-unidades-container');
-    const selectId = `edit_unidad_${unidadCounter}`;
-    
-    // Crear el HTML con todas las opciones de unidades
-    let optionsHtml = '<option value="">Seleccionar unidad</option>';
-    
-    // Generar las opciones usando JavaScript puro (no Django template)
-    unidadesDisponibles.forEach(unidad => {
-        const selected = unidad.id === unidadId ? 'selected' : '';
-        const disabled = unidad.disponible === false && unidad.id !== unidadId ? 'disabled' : '';
-        const ocupadaText = unidad.disponible === false && unidad.id !== unidadId ? '(Ocupada)' : '';
-        
-        optionsHtml += `<option value="${unidad.id}" ${selected} ${disabled}>
-            ${unidad.codigo} ${ocupadaText}
-        </option>`;
-    });
-    
-    const selectGroup = document.createElement('div');
-    selectGroup.className = 'input-group mb-2';
-    selectGroup.innerHTML = `
-        <select class="form-select" id="${selectId}" name="unidades" required>
-            ${optionsHtml}
-        </select>
-        <button type="button" class="btn btn-outline-danger" onclick="removerUnidad(this)">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
-    
-    container.appendChild(selectGroup);
-    unidadCounter++;
-}
-
-// Agregar una unidad inicial al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
-    agregarUnidad();
-});
 </script>
-
-<style>
-.input-group .btn-outline-danger {
-    border-color: #dc3545;
-    color: #dc3545;
-}
-
-.input-group .btn-outline-danger:hover {
-    background-color: #dc3545;
-    color: white;
-}
-</style>
 {% endblock %}

@@ -8,22 +8,65 @@
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="h2 text-primary-custom">Acta de Evaluación</h1>
-            <p class="lead">{{ acta.materia.nombre }} - {{ acta.carrera.nombre }} - Grupo {{ acta.grupo }}</p>
+            <p class="lead">
+                {{ acta.materia.nombre }} - {{ acta.carrera.nombre }} - {{ acta.periodo }}
+            </p>
         </div>
     </div>
 
     <div class="card">
         <div class="card-body">
-            <div class="mb-3">
-                <iframe src="{% url 'view_acta_pdf' acta.id %}" width="100%" height="600px" style="border: none;"></iframe>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <strong>Carrera:</strong><br>
+                    {{ acta.carrera.codigo }} - {{ acta.carrera.nombre }}
+                </div>
+                <div class="col-md-4">
+                    <strong>Materia:</strong><br>
+                    {{ acta.materia.unidad.codigo }} - {{ acta.materia.nombre }}
+                </div>
+                <div class="col-md-4">
+                    <strong>Ciclo escolar:</strong><br>
+                    {{ acta.periodo }}
+                </div>
+
+                <div class="col-md-3">
+                    <strong>Semestre:</strong><br>
+                    {{ acta.semestre }}
+                </div>
+                <div class="col-md-3">
+                    <strong>Turno:</strong><br>
+                    {{ acta.turno }} ({{ acta.grupo }})
+                </div>
+                <div class="col-md-3">
+                    <strong>Total horas:</strong><br>
+                    {{ acta.total_horas }}
+                </div>
+                <div class="col-md-3">
+                    <strong>Estado:</strong><br>
+                    {{ acta.get_estado_display }}
+                </div>
+
+                <div class="col-md-4">
+                    <strong>Identificador docente:</strong><br>
+                    {{ acta.docente_identificador }}
+                </div>
+                <div class="col-md-8">
+                    <strong>Docente:</strong><br>
+                    {{ acta.docente_nombre }}
+                </div>
             </div>
-            
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                <a href="{% url 'acta_list' %}" class="btn btn-secondary me-md-2">
+
+            <div class="alert alert-success">
+                El acta fue generada como archivo Excel con el formato oficial.
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <a href="{% url 'acta_list' %}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i>Volver a la Lista
                 </a>
                 <a href="{% url 'download_acta' acta.id %}" class="btn btn-primary-custom">
-                    <i class="fas fa-download me-2"></i>Descargar PDF
+                    <i class="fas fa-file-excel me-2"></i>Descargar Excel
                 </a>
             </div>
         </div>

@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'alumnos',
     'constancias',
     'evaluaciones',
+    'administracion',
 ]
 
 # Modelo de usuario personalizado

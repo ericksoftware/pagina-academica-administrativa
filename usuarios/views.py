@@ -7,6 +7,26 @@ from django.db.models import Q
 from core.decorators import control_escolar_required, directivo_required
 from .models import Usuario
 from django.core.exceptions import ValidationError
+import os
+import secrets
+
+def validar_clave_eliminacion(request, variable_env):
+    clave_configurada = os.getenv(variable_env, '').strip()
+    clave_ingresada = request.POST.get('delete_password', '').strip()
+
+    if not clave_configurada:
+        messages.error(request, f'No está configurada la variable {variable_env} en el archivo .env.')
+        return False
+
+    if not clave_ingresada:
+        messages.error(request, 'Debes ingresar la clave de eliminación.')
+        return False
+
+    if not secrets.compare_digest(clave_ingresada, clave_configurada):
+        messages.error(request, 'Clave de eliminación incorrecta.')
+        return False
+
+    return True
 
 @login_required
 def user_list(request):
@@ -302,18 +322,19 @@ def user_edit(request, user_id):
 @login_required
 def user_delete(request, user_id):
     """Eliminar usuario - Solo control escolar y directivos"""
-    # Verificar permisos
     if request.user.tipo_usuario not in ['control_escolar', 'directivo']:
         return render(request, 'core/403.html', status=403)
-    
+
     usuario = get_object_or_404(Usuario, id=user_id)
-    
-    # PREVENIR eliminación de usuarios tipo alumno
+
     if usuario.tipo_usuario == 'alumno':
         messages.error(request, 'Los usuarios tipo "Alumno" se gestionan desde el módulo de Alumnos')
         return redirect('user_list')
-    
+
     if request.method == 'POST':
+        if not validar_clave_eliminacion(request, 'del_us_pass'):
+            return redirect('user_detail', user_id=usuario.id)
+
         try:
             nombre_completo = usuario.get_full_name()
             usuario.delete()
@@ -321,7 +342,8 @@ def user_delete(request, user_id):
             return redirect('user_list')
         except Exception as e:
             messages.error(request, f'Error al eliminar el usuario: {str(e)}')
-    
+            return redirect('user_detail', user_id=usuario.id)
+
     context = {
         'usuario': usuario,
         'page_title': f'Eliminar {usuario.get_full_name()}'

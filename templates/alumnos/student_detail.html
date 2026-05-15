@@ -374,21 +374,44 @@
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>¿Estás seguro de que deseas eliminar al alumno <strong>{{ alumno.nombre_completo }}</strong>?</p>
-                <p class="text-danger"><strong>Esta acción no se puede deshacer.</strong></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <form method="post" action="{% url 'student_delete' alumno.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Eliminar</button>
-                </form>
-            </div>
+            <form method="post" action="{% url 'student_delete' alumno.id %}" id="studentDeleteForm">
+                {% csrf_token %}
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar al alumno <strong>{{ alumno.nombre_completo }}</strong>?</p>
+                    <p class="text-danger"><strong>Esta acción no se puede deshacer.</strong></p>
+
+                    <div class="mt-3">
+                        <label for="studentDeletePassword" class="form-label">
+                            Clave de eliminación *
+                        </label>
+                        <input
+                            type="password"
+                            class="form-control"
+                            id="studentDeletePassword"
+                            name="delete_password"
+                            placeholder="Ingresa la clave para eliminar alumnos"
+                            autocomplete="off"
+                            required
+                        >
+                        <div class="form-text text-muted">
+                            El botón de eliminar se habilitará al ingresar la clave.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger" id="studentDeleteSubmit" disabled>
+                        Eliminar
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -436,6 +459,17 @@ document.getElementById('calificacionesModal').addEventListener('shown.bs.modal'
     });
     
     console.log(`🔍 Calificadas: ${calificadas}/${inputs.length}`);
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById('studentDeletePassword');
+    const button = document.getElementById('studentDeleteSubmit');
+
+    if (!input || !button) return;
+
+    input.addEventListener('input', function () {
+        button.disabled = input.value.trim().length === 0;
+    });
 });
 </script>
 {% endblock %}

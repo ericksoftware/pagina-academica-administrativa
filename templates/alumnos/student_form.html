@@ -249,18 +249,18 @@
                     <div class="col-md-6">
                         <label for="email_institucional" class="form-label">Correo Institucional *</label>
                         <input type="text" class="form-control" id="email_institucional" name="email_institucional" 
-                               value="{{ alumno.email_institucional|default:'Pendiente' }}"
+                               value="{{ alumno.email_institucional|default:'PENDIENTE' }}"
                                list="email_suggestions"
-                               placeholder="Pendiente o usuario@edubc.mx">
+                               placeholder="PENDIENTE o usuario@edubc.mx">
                         <datalist id="email_suggestions">
-                            <option value="Pendiente">
+                            <option value="PENDIENTE">
                             <option value="usuario@edubc.mx">
                         </datalist>
                         <div class="form-text">
-                            Debe terminar con <strong>@edubc.mx</strong> o ser <strong>"Pendiente"</strong> si no tiene correo asignado.
+                            Debe terminar con <strong>@edubc.mx</strong> o ser <strong>"PENDIENTE"</strong> si no tiene correo asignado.
                         </div>
                         <div id="email_institucional_feedback" class="invalid-feedback">
-                            El correo institucional debe terminar con @edubc.mx o ser "Pendiente"
+                            El correo institucional debe terminar con @edubc.mx o ser "PENDIENTE"
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -329,8 +329,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Función para validar email institucional
     function validarEmailInstitucional(email) {
-        if (email === 'Pendiente') return true;
-        return email.endsWith('@edubc.mx') && email.includes('@');
+        const valor = email.trim();
+
+        if (valor.toUpperCase() === 'PENDIENTE') return true;
+
+        const emailNormalizado = valor.toLowerCase();
+
+        return emailNormalizado.endsWith('@edubc.mx') && emailNormalizado.includes('@');
     }
     
     // Función para validar email personal
@@ -440,6 +445,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Validar email institucional
         const emailInst = emailInstitucional.value.trim();
+
+        if (emailInst.toUpperCase() === 'PENDIENTE') {
+            emailInstitucional.value = 'PENDIENTE';
+        } else {
+            emailInstitucional.value = emailInst.toLowerCase();
+        }
+
         if (!emailInst) {
             isValid = false;
             errores.push('El correo institucional es obligatorio');

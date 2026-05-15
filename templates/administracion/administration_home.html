@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Administración - BENUNE{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Inicio</a>
+                    </li>
+                    <li class="breadcrumb-item active">Administración</li>
+                </ol>
+            </nav>
+
+            <div class="d-flex align-items-center mb-3">
+                <div class="bg-primary-custom rounded-circle p-3 me-3">
+                    <i class="fas fa-sliders-h fa-2x text-white"></i>
+                </div>
+                <div>
+                    <h1 class="h2 text-primary-custom mb-1">Administración</h1>
+                    <p class="lead mb-0">Controles generales del sistema BENUNE</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card admin-card">
+                <div class="card-header bg-primary-custom text-white">
+                    <h2 class="h5 mb-0">
+                        <i class="fas fa-quote-left me-2"></i>
+                        Configuración de constancias
+                    </h2>
+                </div>
+
+                <div class="card-body">
+                    <p class="text-muted">
+                        Este lema será utilizado automáticamente al generar nuevas constancias.
+                        El usuario que genere una constancia ya no podrá modificarlo manualmente.
+                    </p>
+
+                        <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <label for="lema_anio" class="form-label">Lema actual del año</label>
+                            <textarea
+                                class="form-control"
+                                id="lema_anio"
+                                name="lema_anio"
+                                rows="3"
+                                maxlength="255"
+                                required>{{ configuracion.lema_anio }}</textarea>
+                            <div class="form-text">
+                                Máximo 255 caracteres. Este texto aparecerá en las constancias nuevas.
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h5 class="text-primary-custom mb-3">
+                            <i class="fas fa-signature me-2"></i>
+                            Firmas de constancias
+                        </h5>
+
+                        <div class="mb-3">
+                            <label for="firma_izquierda_constancia" class="form-label">Firma izquierda</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="firma_izquierda_constancia"
+                                name="firma_izquierda_constancia"
+                                maxlength="255"
+                                value="{{ configuracion.firma_izquierda_constancia }}"
+                                required
+                            >
+                            <div class="form-text">
+                                Nombre que aparecerá en la firma izquierda de las constancias nuevas.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="firma_derecha_constancia" class="form-label">Firma derecha</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="firma_derecha_constancia"
+                                name="firma_derecha_constancia"
+                                maxlength="255"
+                                value="{{ configuracion.firma_derecha_constancia }}"
+                                required
+                            >
+                            <div class="form-text">
+                                Nombre que aparecerá en la firma derecha de las constancias nuevas.
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'dashboard' %}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-2"></i>Volver
+                            </a>
+                            <button type="submit" class="btn btn-primary-custom">
+                                <i class="fas fa-save me-2"></i>Guardar configuración
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card admin-card">
+                <div class="card-header bg-secondary-custom text-white">
+                    <h3 class="h5 mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Información
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <h6 class="text-muted">Última actualización</h6>
+                    <p class="fw-bold mb-3">
+                        {{ configuracion.actualizado_en|date:"d/m/Y H:i" }}
+                    </p>
+
+                    <h6 class="text-muted">Actualizado por</h6>
+                    <p class="fw-bold mb-0">
+                        {% if configuracion.actualizado_por %}
+                            {{ configuracion.actualizado_por.get_full_name|default:configuracion.actualizado_por.username }}
+                        {% else %}
+                            No registrado
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="alert alert-warning mt-3">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Las constancias ya generadas conservarán los datos con las que fueron creadas.
+                El cambio aplicará para las nuevas constancias.
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border: none;
+}
+
+.admin-card .card-header {
+    border-radius: 12px 12px 0 0;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.2rem rgba(131, 16, 18, 0.25);
+}
+</style>
+{% endblock %}

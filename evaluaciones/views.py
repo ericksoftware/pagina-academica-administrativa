@@ -21,8 +21,28 @@ from copy import copy
 from decimal import Decimal
 from pathlib import Path
 from openpyxl import load_workbook
+import os
+import secrets
 
 ACTA_TEMPLATE_PATH = Path(settings.BASE_DIR) / 'templates' / 'evaluaciones' / 'plantillas' / 'acta_evaluacion_base.xlsx'
+
+def validar_clave_eliminacion(request, variable_env):
+    clave_configurada = os.getenv(variable_env, '').strip()
+    clave_ingresada = request.POST.get('delete_password', '').strip()
+
+    if not clave_configurada:
+        messages.error(request, f'No está configurada la variable {variable_env} en el archivo .env.')
+        return False
+
+    if not clave_ingresada:
+        messages.error(request, 'Debes ingresar la clave de eliminación.')
+        return False
+
+    if not secrets.compare_digest(clave_ingresada, clave_configurada):
+        messages.error(request, 'Clave de eliminación incorrecta.')
+        return False
+
+    return True
 
 def construir_periodos_candidatos(ciclo_escolar, semestre):
     valor = (ciclo_escolar or '').strip()
@@ -407,18 +427,22 @@ def detalle_carrera(request, carrera_id):
 
 @control_escolar_or_directivo_required
 def eliminar_carrera(request, carrera_id):
-    """Eliminar una carrera"""
     carrera = get_object_or_404(Carrera, id=carrera_id)
-    
+
     if request.method == 'POST':
+        if not validar_clave_eliminacion(request, 'del_ca_pass'):
+            return redirect('detalle_carrera', carrera_id=carrera.id)
+
         try:
             nombre = carrera.nombre
             carrera.delete()
-            messages.success(request, f'Carrera "{nombre}" eliminada exitosamente')
+            messages.success(request, f'Carrera {nombre} eliminada exitosamente')
+            return redirect('lista_carreras')
         except Exception as e:
             messages.error(request, f'Error al eliminar la carrera: {str(e)}')
-    
-    return redirect('lista_carreras')
+            return redirect('detalle_carrera', carrera_id=carrera.id)
+
+    return redirect('detalle_carrera', carrera_id=carrera.id)
 
 @control_escolar_or_directivo_required
 def agregar_materia(request, carrera_id):

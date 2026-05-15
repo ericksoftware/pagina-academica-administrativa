@@ -5,11 +5,31 @@ from django.http import HttpResponseForbidden
 from django.core.paginator import Paginator
 from django.db.models import Q
 from core.decorators import control_escolar_or_directivo_required
-from .models import Alumno
+from .models import Alumno, normalizar_email_institucional
 from evaluaciones.models import Carrera, Calificacion, Materia, Unidad
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 from decimal import Decimal, InvalidOperation
+import os
+import secrets
+
+def validar_clave_eliminacion(request, variable_env):
+    clave_configurada = os.getenv(variable_env, '').strip()
+    clave_ingresada = request.POST.get('delete_password', '').strip()
+
+    if not clave_configurada:
+        messages.error(request, f'No está configurada la variable {variable_env} en el archivo .env.')
+        return False
+
+    if not clave_ingresada:
+        messages.error(request, 'Debes ingresar la clave de eliminación.')
+        return False
+
+    if not secrets.compare_digest(clave_ingresada, clave_configurada):
+        messages.error(request, 'Clave de eliminación incorrecta.')
+        return False
+
+    return True
 
 @control_escolar_or_directivo_required
 def student_list(request):
@@ -184,7 +204,9 @@ def student_create(request):
             matricula = request.POST.get('matricula', 'PENDIENTE').strip().upper()
             curp = request.POST.get('curp', 'N/A').strip().upper()
             rfc = request.POST.get('rfc', 'N/A').strip().upper()
-            email_institucional = request.POST.get('email_institucional', 'Pendiente').strip()
+            email_institucional = normalizar_email_institucional(
+                request.POST.get('email_institucional', 'PENDIENTE')
+            )
             
             # Validaciones de duplicados - BUSCANDO EN TODOS LOS REGISTROS
             errores = []
@@ -208,7 +230,7 @@ def student_create(request):
                         errores.append(f'El RFC "{rfc}" ya le pertenece al alumno: {alumno_existente.nombre_completo()}')
                         break
             
-            if email_institucional not in ['Pendiente', 'N/A']:
+            if email_institucional not in ['PENDIENTE', 'N/A']:
                 if not email_institucional.endswith('@edubc.mx'):
                     errores.append('El correo institucional debe terminar con @edubc.mx')
                 else:
@@ -348,7 +370,9 @@ def student_edit(request, student_id):
             nueva_matricula = request.POST.get('matricula', 'PENDIENTE').strip().upper()
             nueva_curp = request.POST.get('curp', 'N/A').strip().upper()
             nuevo_rfc = request.POST.get('rfc', 'N/A').strip().upper()
-            nuevo_email_institucional = request.POST.get('email_institucional', 'Pendiente').strip()
+            nuevo_email_institucional = normalizar_email_institucional(
+                request.POST.get('email_institucional', 'PENDIENTE')
+            )
             nuevo_grupo = request.POST.get('grupo', '000').strip()
             
             # Validaciones de duplicados - BUSCANDO EN TODOS LOS REGISTROS
@@ -374,7 +398,7 @@ def student_edit(request, student_id):
                         errores.append(f'El RFC "{nuevo_rfc}" ya le pertenece al alumno: {alumno_existente.nombre_completo()}')
                         break
             
-            if (nuevo_email_institucional not in ['Pendiente', 'N/A'] and 
+            if (nuevo_email_institucional not in ['PENDIENTE', 'N/A'] and 
                 nuevo_email_institucional != alumno.email_institucional):
                 if not nuevo_email_institucional.endswith('@edubc.mx'):
                     errores.append('El correo institucional debe terminar con @edubc.mx')
@@ -478,10 +502,13 @@ def student_edit(request, student_id):
 
 @control_escolar_or_directivo_required
 def student_delete(request, student_id):
-    """Eliminar alumno - Solo control escolar"""
+    """Eliminar alumno - Solo control escolar y directivos"""
     alumno = get_object_or_404(Alumno, id=student_id)
-    
+
     if request.method == 'POST':
+        if not validar_clave_eliminacion(request, 'del_al_pass'):
+            return redirect('student_detail', student_id=alumno.id)
+
         try:
             nombre_completo = alumno.nombre_completo()
             alumno.delete()
@@ -489,7 +516,8 @@ def student_delete(request, student_id):
             return redirect('student_list')
         except Exception as e:
             messages.error(request, f'Error al eliminar el alumno: {str(e)}')
-    
+            return redirect('student_detail', student_id=alumno.id)
+
     context = {
         'alumno': alumno,
         'page_title': f'Eliminar {alumno.nombre_completo()}'

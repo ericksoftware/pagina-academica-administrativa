@@ -9,14 +9,31 @@
         <div class="col-12">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Inicio</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'certificate_list' %}">Constancias</a></li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Inicio</a>
+                    </li>
+
+                    {% if es_alumno %}
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'generate_certificate' %}">Constancias</a>
+                    </li>
+                    {% else %}
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'certificate_list' %}">Constancias</a>
+                    </li>
+                    {% endif %}
+
                     <li class="breadcrumb-item active">Generar</li>
                 </ol>
             </nav>
-            
+
             <h1 class="h2 text-primary-custom">Generar Constancia de Estudios</h1>
+
+            {% if es_alumno %}
+            <p class="lead">Genera tu constancia de estudios con tus datos registrados</p>
+            {% else %}
             <p class="lead">Complete los datos para generar una nueva constancia</p>
+            {% endif %}
         </div>
     </div>
 
@@ -24,84 +41,176 @@
         <div class="card-body">
             <form method="post">
                 {% csrf_token %}
-                
+
                 <div class="row mb-4">
                     <div class="col-md-6">
-                        <!-- Campo de búsqueda -->
-                        <div class="mb-3">
-                            <label for="alumnoSearch" class="form-label">Buscar Alumno</label>
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-search"></i>
-                                </span>
-                                <input type="text" class="form-control" id="alumnoSearch" 
-                                       placeholder="Escribe nombre, apellido o matrícula...">
-                            </div>
-                            <div class="form-text">Busca por nombre, apellidos o matrícula</div>
-                        </div>
+                        {% if es_alumno %}
+                            <input type="hidden" name="alumno" value="{{ alumno_actual.id }}">
 
-                        <div class="mb-3">
-                            <label for="alumno" class="form-label">Seleccionar Alumno *</label>
-                            <select class="form-select" id="alumno" name="alumno" required size="8" style="min-height: 200px;">
-                                {% for alumno in alumnos %}
-                                <option value="{{ alumno.id }}" 
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-primary-custom text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-user-graduate me-2"></i>
+                                        Tus datos
+                                    </h6>
+                                </div>
+
+                                <div class="card-body">
+                                    <div class="mb-2">
+                                        <strong>Nombre:</strong>
+                                        <span>{{ alumno_actual.nombre_completo }}</span>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <strong>Matrícula:</strong>
+                                        <span>{{ alumno_actual.matricula }}</span>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <strong>Carrera:</strong>
+                                        <span>{{ alumno_actual.carrera.nombre|default:"No asignada" }}</span>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <strong>Semestre:</strong>
+                                        <span>{{ alumno_actual.semestre_actual }}° Semestre</span>
+                                    </div>
+
+                                    <div>
+                                        <strong>CURP:</strong>
+                                        <span>{{ alumno_actual.curp|default:"N/A" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Esta constancia se generará únicamente con tus datos registrados.
+                            </div>
+                        {% else %}
+                            <!-- Campo de búsqueda -->
+                            <div class="mb-3">
+                                <label for="alumnoSearch" class="form-label">Buscar Alumno</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="alumnoSearch"
+                                        placeholder="Escribe nombre, apellido o matrícula..."
+                                    >
+                                </div>
+                                <div class="form-text">Busca por nombre, apellidos o matrícula</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="alumno" class="form-label">Seleccionar Alumno *</label>
+                                <select
+                                    class="form-select"
+                                    id="alumno"
+                                    name="alumno"
+                                    required
+                                    size="8"
+                                    style="min-height: 200px;"
+                                >
+                                    {% for alumno in alumnos %}
+                                    <option
+                                        value="{{ alumno.id }}"
                                         data-nombre="{{ alumno.nombre_completo|lower }}"
                                         data-matricula="{{ alumno.matricula|lower }}"
-                                        data-texto="{{ alumno.nombre_completo }} - {{ alumno.matricula }}">
-                                    {{ alumno.nombre_completo }} - {{ alumno.matricula }}
-                                    {% if alumno.carrera %}
-                                     - {{ alumno.carrera.nombre }}
-                                    {% endif %}
-                                    {% if alumno.semestre_actual %}
-                                     - {{ alumno.semestre_actual }}° Semestre
-                                    {% endif %}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <div class="form-text">
-                                <span id="resultCount">{{ alumnos.count }}</span> alumnos encontrados
+                                        data-texto="{{ alumno.nombre_completo }} - {{ alumno.matricula }}"
+                                    >
+                                        {{ alumno.nombre_completo }} - {{ alumno.matricula }}
+                                        {% if alumno.carrera %}
+                                         - {{ alumno.carrera.nombre }}
+                                        {% endif %}
+                                        {% if alumno.semestre_actual %}
+                                         - {{ alumno.semestre_actual }}° Semestre
+                                        {% endif %}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">
+                                    <span id="resultCount">{{ alumnos.count }}</span> alumnos encontrados
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        {% if es_alumno %}
+                        <div class="mb-3">
+                            <label class="form-label">Fecha de Emisión</label>
+                            <div class="alert alert-light border mb-0">
+                                <i class="fas fa-calendar-day me-2 text-primary-custom"></i>
+                                Se usará automáticamente la fecha actual.
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="col-md-6">
+                        {% else %}
                         <div class="mb-3">
                             <label for="fecha_emision" class="form-label">Fecha de Emisión *</label>
-                            <input type="date" class="form-control" id="fecha_emision" name="fecha_emision" 
-                                   value="{% now 'Y-m-d' %}" required>
+                            <input
+                                type="date"
+                                class="form-control"
+                                id="fecha_emision"
+                                name="fecha_emision"
+                                value="{% now 'Y-m-d' %}"
+                                required
+                            >
                             <div class="form-text">Fecha en que se emite la constancia</div>
                         </div>
+                        {% endif %}
 
                         <div class="mb-3">
-                            <label for="lema_anio" class="form-label">Lema del Año</label>
-                            <input type="text" class="form-control" id="lema_anio" name="lema_anio" 
-                                value="2025, Año del Turismo Sostenible como Impulsor del Bienestar Social y Progreso" 
-                                placeholder="Lema del año" required>
-                            <div class="form-text">Lema que aparecerá en la constancia</div>
+                            <label class="form-label">Lema del Año</label>
+                            <div class="alert alert-light border mb-0">
+                                <div class="d-flex">
+                                    <div class="me-3 text-primary-custom">
+                                        <i class="fas fa-quote-left fa-lg"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">{{ lema_actual }}</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Nuevos campos para las firmas -->
+                        {% if not es_alumno %}
+                        <!-- Firmas configuradas desde Administración -->
                         <div class="mb-3">
-                            <label for="firma_izquierda" class="form-label">Firma Izquierda</label>
-                            <input type="text" class="form-control" id="firma_izquierda" name="firma_izquierda" 
-                                   value="Vo.Bo. Subdirección Académica" placeholder="Nombre para la firma izquierda">
-                            <div class="form-text">Nombre que aparecerá en la firma izquierda</div>
+                            <label class="form-label">Firmas de la Constancia</label>
+
+                            <div class="alert alert-light border mb-0">
+                                <div class="mb-2">
+                                    <strong>Firma izquierda:</strong>
+                                    <span>{{ firma_izquierda_actual }}</span>
+                                </div>
+
+                                <div>
+                                    <strong>Firma derecha:</strong>
+                                    <span>{{ firma_derecha_actual }}</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="firma_derecha" class="form-label">Firma Derecha</label>
-                            <input type="text" class="form-control" id="firma_derecha" name="firma_derecha" 
-                                   value="DRA. LIUBA ABIYOVA TÉLLEZ OSUNA" placeholder="Nombre para la firma derecha">
-                            <div class="form-text">Nombre que aparecerá en la firma derecha</div>
-                        </div>
-
-                        <!-- Nuevo campo para el costo -->
+                        <!-- Campo para el costo -->
                         <div class="mb-3">
                             <label for="costo" class="form-label">Costo de la Constancia</label>
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
-                                <input type="number" step="0.01" min="0" class="form-control" id="costo" name="costo" 
-                                       value="0.00" placeholder="0.00" required>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    class="form-control"
+                                    id="costo"
+                                    name="costo"
+                                    value="0.00"
+                                    placeholder="0.00"
+                                    required
+                                >
                             </div>
                             <div class="form-text">Costo de la constancia en pesos mexicanos</div>
                         </div>
@@ -109,8 +218,11 @@
                         <!-- Información del alumno seleccionado -->
                         <div class="card mt-4" id="alumnoInfo" style="display: none;">
                             <div class="card-header bg-info text-white">
-                                <h6 class="mb-0"><i class="fas fa-user me-2"></i>Información del Alumno</h6>
+                                <h6 class="mb-0">
+                                    <i class="fas fa-user me-2"></i>Información del Alumno
+                                </h6>
                             </div>
+
                             <div class="card-body">
                                 <div class="row small">
                                     <div class="col-12 mb-2">
@@ -131,18 +243,26 @@
                                 </div>
                             </div>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
-                
-                <!-- Campo oculto para tipo de constancia (siempre estudios) -->
+
+                <!-- Campo oculto para tipo de constancia: siempre estudios -->
                 <input type="hidden" name="tipo_constancia" value="estudios">
-                
+
                 <div class="row">
                     <div class="col-12">
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            {% if es_alumno %}
+                            <a href="{% url 'dashboard' %}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            {% else %}
                             <a href="{% url 'certificate_list' %}" class="btn btn-secondary me-md-2">
                                 <i class="fas fa-times me-2"></i>Cancelar
                             </a>
+                            {% endif %}
+
                             <button type="submit" class="btn btn-primary-custom">
                                 <i class="fas fa-file-pdf me-2"></i>Generar Constancia
                             </button>
@@ -160,13 +280,15 @@
     color: var(--color-primary);
 }
 
-.form-select, .form-control {
+.form-select,
+.form-control {
     border-radius: 8px;
     border: 2px solid #e9ecef;
     transition: all 0.3s ease;
 }
 
-.form-select:focus, .form-control:focus {
+.form-select:focus,
+.form-control:focus {
     border-color: var(--color-primary);
     box-shadow: 0 0 0 0.2rem rgba(131, 16, 18, 0.25);
 }
@@ -191,67 +313,65 @@
 }
 </style>
 
+{% if not es_alumno %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const alumnoSelect = document.getElementById('alumno');
     const alumnoSearch = document.getElementById('alumnoSearch');
     const resultCount = document.getElementById('resultCount');
     const alumnoInfo = document.getElementById('alumnoInfo');
-    
-    // Información de alumnos (podríamos cargarla via AJAX si hay muchos)
+
+    if (!alumnoSelect || !alumnoSearch || !resultCount || !alumnoInfo) {
+        return;
+    }
+
     const alumnosData = {
         {% for alumno in alumnos %}
         '{{ alumno.id }}': {
-            nombre: '{{ alumno.nombre_completo }}',
-            matricula: '{{ alumno.matricula }}',
-            carrera: '{{ alumno.carrera.nombre|default:"No asignada" }}',
-            semestre: '{{ alumno.semestre_actual|default:"N/A" }}',
-            curp: '{{ alumno.curp|default:"N/A" }}'
+            nombre: '{{ alumno.nombre_completo|escapejs }}',
+            matricula: '{{ alumno.matricula|escapejs }}',
+            carrera: '{{ alumno.carrera.nombre|default:"No asignada"|escapejs }}',
+            semestre: '{{ alumno.semestre_actual|default:"N/A"|escapejs }}',
+            curp: '{{ alumno.curp|default:"N/A"|escapejs }}'
         }{% if not forloop.last %},{% endif %}
         {% endfor %}
     };
 
-    // Función para filtrar alumnos
     function filtrarAlumnos(termino) {
         const options = alumnoSelect.querySelectorAll('option');
         let visibleCount = 0;
         const terminoLower = termino.toLowerCase();
-        
+
         options.forEach(option => {
-            if (option.value === '') {
-                option.style.display = termino ? 'none' : 'block';
-                if (!termino) visibleCount++;
-                return;
-            }
-            
             const texto = option.getAttribute('data-texto').toLowerCase();
             const nombre = option.getAttribute('data-nombre');
             const matricula = option.getAttribute('data-matricula');
-            
-            const coincide = texto.includes(terminoLower) || 
-                           nombre.includes(terminoLower) || 
-                           matricula.includes(terminoLower);
-            
+
+            const coincide =
+                texto.includes(terminoLower) ||
+                nombre.includes(terminoLower) ||
+                matricula.includes(terminoLower);
+
             option.style.display = coincide ? 'block' : 'none';
-            
+
             if (coincide) {
                 visibleCount++;
-                // Resaltar el término de búsqueda en el texto
+
                 if (termino) {
                     const regex = new RegExp(`(${termino})`, 'gi');
-                    const textoOriginal = option.textContent;
+                    const textoOriginal = option.getAttribute('data-texto');
                     option.innerHTML = textoOriginal.replace(regex, '<span class="highlight">$1</span>');
                 } else {
                     option.innerHTML = option.getAttribute('data-texto');
                 }
             }
         });
-        
-        resultCount.textContent = visibleCount - 1; // Restamos la opción vacía
-        
-        // Si solo hay un resultado después de filtrar, seleccionarlo automáticamente
-        if (visibleCount === 2 && termino) { // 2 porque cuenta la opción vacía
-            const unicaOpcion = alumnoSelect.querySelector('option[style="display: block;"]:not([value=""])');
+
+        resultCount.textContent = visibleCount;
+
+        if (visibleCount === 1 && termino) {
+            const unicaOpcion = Array.from(options).find(option => option.style.display === 'block');
+
             if (unicaOpcion) {
                 alumnoSelect.value = unicaOpcion.value;
                 mostrarInfoAlumno(unicaOpcion.value);
@@ -259,27 +379,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Función para mostrar información del alumno seleccionado
     function mostrarInfoAlumno(alumnoId) {
         const info = alumnosData[alumnoId];
+
         if (info) {
             document.getElementById('infoNombre').textContent = info.nombre;
             document.getElementById('infoMatricula').textContent = info.matricula;
             document.getElementById('infoCarrera').textContent = info.carrera;
-            document.getElementById('infoSemestre').textContent = info.semestre + (info.semestre !== 'N/A' ? '° Semestre' : '');
+            document.getElementById('infoSemestre').textContent =
+                info.semestre + (info.semestre !== 'N/A' ? '° Semestre' : '');
             document.getElementById('infoCurp').textContent = info.curp;
+
             alumnoInfo.style.display = 'block';
         } else {
             alumnoInfo.style.display = 'none';
         }
     }
 
-    // Evento de búsqueda en tiempo real
     alumnoSearch.addEventListener('input', function(e) {
         filtrarAlumnos(e.target.value.trim());
     });
 
-    // Evento cuando se selecciona un alumno
     alumnoSelect.addEventListener('change', function(e) {
         if (e.target.value) {
             mostrarInfoAlumno(e.target.value);
@@ -288,16 +408,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Limpiar búsqueda cuando se cambia la selección manualmente
-    alumnoSelect.addEventListener('focus', function() {
-        alumnoSearch.focus();
-    });
-
-    // Tecla Enter en la búsqueda selecciona el primer resultado
     alumnoSearch.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
-            const primeraOpcion = alumnoSelect.querySelector('option[style="display: block;"]:not([value=""])');
+
+            const primeraOpcion = Array.from(alumnoSelect.querySelectorAll('option'))
+                .find(option => option.style.display !== 'none');
+
             if (primeraOpcion) {
                 alumnoSelect.value = primeraOpcion.value;
                 mostrarInfoAlumno(primeraOpcion.value);
@@ -305,8 +422,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Inicializar contador
     resultCount.textContent = {{ alumnos.count }};
 });
 </script>
+{% endif %}
 {% endblock %}

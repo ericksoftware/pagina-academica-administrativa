@@ -28,6 +28,7 @@ urlpatterns = [
     path('alumnos/', include('alumnos.urls')),    # Alumnos (solo control escolar)
     path('constancias/', include('constancias.urls')), # Constancias (solo control escolar)
     path('evaluaciones/', include('evaluaciones.urls')), # Evaluaciones (solo control escolar)
+    path('administracion/', include('administracion.urls')),
 ]
 
 # Servir archivos estáticos y media en desarrollo

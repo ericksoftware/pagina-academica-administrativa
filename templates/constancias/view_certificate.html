@@ -10,7 +10,11 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Inicio</a></li>
+                    {% if user.tipo_usuario == 'alumno' %}
+                    <li class="breadcrumb-item"><a href="{% url 'generate_certificate' %}">Constancias</a></li>
+                    {% else %}
                     <li class="breadcrumb-item"><a href="{% url 'certificate_list' %}">Constancias</a></li>
+                    {% endif %}
                     <li class="breadcrumb-item active">Ver</li>
                 </ol>
             </nav>
@@ -85,9 +89,15 @@
                             <i class="fas fa-exclamation-triangle me-2"></i>PDF No Disponible
                         </button>
                         {% endif %}
+                        {% if user.tipo_usuario == 'alumno' %}
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Volver al Inicio
+                        </a>
+                        {% else %}
                         <a href="{% url 'certificate_list' %}" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left me-2"></i>Volver a la Lista
                         </a>
+                        {% endif %}
                         <a href="{% url 'generate_certificate' %}" class="btn btn-outline-primary-custom">
                             <i class="fas fa-plus me-2"></i>Generar Nueva
                         </a>

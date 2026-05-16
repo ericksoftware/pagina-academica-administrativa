@@ -1,100 +1,119 @@
 Diagrama de Estructura del Proyecto BENUNE
 
 BENUNE_SISTEMA/
-├── 📁 config/                          # Configuración principal del proyecto Django
+├── 📁 config/                          
 │   ├── __init__.py
-│   ├── settings.py                    # Configuración: BD, apps, middleware, etc.
-│   ├── urls.py                        # URLs principales del proyecto
+│   ├── settings.py                    
+│   ├── urls.py                     
 │   └── wsgi.py
 │
-├── 📁 usuarios/                       # App de gestión de usuarios
+├── 📁 administracion/                      
 │   ├── __init__.py
-│   ├── admin.py                       # Configuración admin para usuarios
+│   ├── admin.py                      
 │   ├── apps.py
-│   ├── models.py                      # Modelo Usuario personalizado
-│   ├── backends.py                    # Backend de autenticación por email
-│   └── migrations/                    # Migraciones de la app usuarios
+│   ├── models.py                      
+│   ├── backends.py                    
+│   ├── urls.py  
+│   └── migrations/                    
 │
-├── 📁 alumnos/                        # App de gestión de alumnos
+├── 📁 usuarios/                       
 │   ├── __init__.py
-│   ├── admin.py                       # Configuración admin para alumnos
+│   ├── admin.py                     
 │   ├── apps.py
-│   ├── models.py                      # Modelo Alumno
-│   ├── views.py                       # Vistas: lista y detalle de alumnos
-│   ├── urls.py                        # URLs de la app alumnos
-│   └── migrations/                    # Migraciones de la app alumnos
+│   ├── models.py                      
+│   ├── backends.py                   
+│   ├── urls.py  
+│   └── migrations/                   
 │
-├── 📁 constancias/                    # App de gestión de constancias
+├── 📁 alumnos/                      
 │   ├── __init__.py
-│   ├── admin.py                       # Configuración admin para constancias
+│   ├── admin.py                     
 │   ├── apps.py
-│   ├── models.py                      # Modelo Constancia
-│   ├── views.py                       # Vistas: generar, ver, descargar constancias
-│   ├── urls.py                        # URLs de la app constancias
-│   └── migrations/                    # Migraciones de la app constancias
+│   ├── models.py                    
+│   ├── views.py                      
+│   ├── urls.py                       
+│   └── migrations/                
 │
-├── 📁 evaluaciones/                   # App de gestión de evaluaciones
+├── 📁 constancias/             
 │   ├── __init__.py
-│   ├── admin.py                       # Configuración admin para evaluaciones
+│   ├── admin.py                     
 │   ├── apps.py
-│   ├── models.py                      # Modelos: Materia, Calificacion, ActaEvaluacion
-│   ├── views.py                       # Vistas: calificaciones, actas, importación
-│   ├── urls.py                        # URLs de la app evaluaciones
-│   └── migrations/                    # Migraciones de la app evaluaciones
+│   ├── models.py                
+│   ├── views.py                     
+│   ├── urls.py                     
+│   └── migrations/                  
 │
-├── 📁 core/                           # App core (funcionalidades centrales)
+├── 📁 evaluaciones/               
+│   ├── __init__.py
+│   ├── admin.py                   
+│   ├── apps.py
+│   ├── models.py                 
+│   ├── views.py                    
+│   ├── urls.py                  
+│   └── migrations/                
+│
+├── 📁 core/                         
 │   ├── __init__.py
 │   ├── apps.py
-│   ├── views.py                       # Vistas: dashboard, redirecciones
-│   ├── urls.py                        # URLs del core
-│   ├── decorators.py                  # Decoradores de permisos
+│   ├── views.py                  
+│   ├── urls.py          
+│   ├── decorators.py               
 │   ├── encryption.py                  
 │   ├── fields.py                  
-│   └── migrations/                    # Migraciones del core (si las hay)
+│   └── migrations/                   
 │
-├── 📁 templates/                      # Templates HTML
-│   ├── base.html                      # Plantilla base principal
+├── 📁 templates/                
+│   ├── base.html                    
 │   ├── registration/
-│   │   └── login.html                 # Template de login
+│   │   └── login.html   
+│   ├── administracion/
+│   │   └── administracion_home.html             
 │   ├── core/
-│   │   └── dashboard.html             # Dashboard principal
+│   │   └── dashboard.html       
 │   ├── alumnos/
-│   │   ├── student_list.html          # Lista de alumnos
+│   │   ├── student_list.html          
 │   │   ├── student_form.html         
 │   │   ├── student_confirm_delete.html          
-│   │   └── student_detail.html        # Detalle de alumno
+│   │   └── student_detail.html       
 │   ├── constancias/
-│   │   ├── certificate_list.html      # Lista de constancias
-│   │   ├── generate_certificate.html  # Generar constancia
-│   │   ├── view_certificate.html      # Ver constancia
-│   │   └── certificate_template.html  # Template PDF para constancias (aun no existe)
+│   │   ├── certificate_list.html     
+│   │   ├── generate_certificate.html 
+│   │   ├── view_certificate.html    
+│   │   └── certificate_template.html 
 │   └── evaluaciones/
-│       ├── grade_list.html            # Lista de calificaciones
-│       ├── import_grades.html         # Importar calificaciones
-│       ├── generate_transcript.html   # Generar acta
-│       ├── view_transcript.html       # Ver acta
-│       ├── transcript_template.html   # Template PDF para actas (aun no existe)
-│       └── carreras/
-│           ├── detalle_carrera.html          
-│           ├── form_carrera.html         
-│           └── lista_carreras.html   
+│       ├── grade_list.html         
+│       ├── import_grades.html        
+│       ├── generate_transcript.html  
+│       ├── view_transcript.html   
+│       ├── transcript_template.html  
+│       ├── carreras/
+│       │    ├── detalle_carrera.html          
+│       │    ├── form_carrera.html         
+│       │    └── lista_carreras.html   
+│       └── plantillas/
+│            └── actas_evaluacion_base.xlsx  
 │
-├── 📁 static/                         # Archivos estáticos
+├── 📁 static/                  
 │   ├── css/
-│   │   └── styles.css                 # Estilos personalizados
+│   │   └── styles.css             
 │   ├── js/
-│   │   └── scripts.js                 # JavaScript personalizado
-│   └── img/                           # Imágenes
+│   │   └── scripts.js           
+│   └── img/                   
 │
-├── 📁 media/                          # Archivos multimedia (subidos por usuarios)
-│   ├── constancias/                   # Constancias PDF generadas
-│   └── actas/                         # Actas PDF generadas
+├── 📁 media/                       
+│   ├── constancias/ 
+│   │    └── (muchos archivos)                  
+│   └── actas/  
+│        └── (muchos archivos)                    
 │
-├── 📁 venv/                           # Entorno virtual de Python
-├── .env                               # Variables de entorno
-├── requirements.txt                   # Dependencias del proyecto
-├── manage.py                          # Script de gestión de Django
-├── create_test_users.py               # Script para crear usuarios de prueba
-├── create_test_alumnos.py             # Script para crear alumnos de prueba
-├── create_test_materias.py            # Script para crear materias de prueba
-└── README.md                          # Documentación del proyecto
+├── 📁 Scripts_prueba/
+│        └── (muchos archivos)   
+│
+├── 📁 venv/                        
+├── .env                             
+├── requirements.txt               
+├── manage.py                   
+├── create_test_users.py            
+├── create_test_alumnos.py          
+├── create_test_materias.py          
+└── README.md                      

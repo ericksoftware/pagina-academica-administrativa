@@ -9,6 +9,7 @@ class ConfiguracionSistemaAdmin(admin.ModelAdmin):
         'lema_anio',
         'firma_izquierda_constancia',
         'firma_derecha_constancia',
+        'costo_constancia',
         'actualizado_por',
         'actualizado_en'
     ]

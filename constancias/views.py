@@ -170,7 +170,7 @@ def generate_certificate(request):
             if usuario_es_alumno:
                 alumno = alumno_actual
                 fecha_emision = timezone.localdate()
-                costo = 0.0
+                costo = float(configuracion.costo_constancia)
             else:
                 alumno_id = request.POST.get('alumno')
 
@@ -180,7 +180,7 @@ def generate_certificate(request):
 
                 alumno = Alumno.objects.get(id=alumno_id)
                 fecha_emision = request.POST.get('fecha_emision')
-                costo = float(request.POST.get('costo', 0.0))
+                costo = float(configuracion.costo_constancia)
 
             constancia = Constancia.objects.create(
                 alumno=alumno,
@@ -232,6 +232,7 @@ def generate_certificate(request):
         'lema_actual': configuracion.lema_anio,
         'firma_izquierda_actual': configuracion.firma_izquierda_constancia,
         'firma_derecha_actual': configuracion.firma_derecha_constancia,
+        'costo_actual': configuracion.costo_constancia,
         'page_title': 'Generar Constancia',
     }
 

@@ -29,6 +29,13 @@ class ConfiguracionSistema(models.Model):
         related_name='configuraciones_actualizadas'
     )
 
+    costo_constancia = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=0.00,
+        verbose_name='Costo de constancia'
+    )
+
     actualizado_en = models.DateTimeField(auto_now=True)
 
     class Meta:

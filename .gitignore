@@ -1,2 +1,13 @@
 venv
 .env
+
+# Archivos generados por el sistema
+media/constancias/*
+media/actas/*
+
+# Mantener carpetas vacías en Git
+!media/constancias/.gitkeep
+!media/actas/.gitkeep
+
+# Scripts de prueba
+Scripts_prueba/

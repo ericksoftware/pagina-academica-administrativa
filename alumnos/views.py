@@ -318,11 +318,11 @@ def student_create(request):
             alumno.save()
             
             messages.success(request, f'Alumno {alumno.nombre_completo()} creado exitosamente')
-            print("✅ ALUMNO CREADO EXITOSAMENTE")
+            print("ALUMNO CREADO EXITOSAMENTE")
             return redirect('student_list')
             
         except ValidationError as e:
-            print(f"❌ ERROR DE VALIDACIÓN EN VISTA: {e}")
+            print(f"ERROR DE VALIDACIÓN EN VISTA: {e}")
             # Capturar errores de validación del modelo
             for field, errors in e.error_dict.items():
                 for error in errors:
@@ -422,6 +422,7 @@ def student_edit(request, student_id):
             alumno.matricula = nueva_matricula
             alumno.curp = nueva_curp
             alumno.rfc = nuevo_rfc
+            alumno.nombre = request.POST.get('nombre', 'N/A').strip()
             alumno.apellido_paterno = request.POST.get('apellido_paterno', 'N/A').strip()
             alumno.apellido_materno = request.POST.get('apellido_materno', 'N/A').strip()
             alumno.grupo = nuevo_grupo
@@ -479,17 +480,17 @@ def student_edit(request, student_id):
             alumno.save()
             
             messages.success(request, f'Alumno {alumno.nombre_completo()} actualizado exitosamente')
-            print("✅ ALUMNO ACTUALIZADO EXITOSAMENTE")
+            print("ALUMNO ACTUALIZADO EXITOSAMENTE")
             return redirect('student_detail', student_id=alumno.id)
             
         except ValidationError as e:
-            print(f"❌ ERROR DE VALIDACIÓN EN VISTA: {e}")
+            print(f"ERROR DE VALIDACIÓN EN VISTA: {e}")
             # Capturar errores de validación del modelo
             for field, errors in e.error_dict.items():
                 for error in errors:
                     messages.error(request, f'Error en {field}: {error}')
         except Exception as e:
-            print(f"❌ ERROR GENERAL EN VISTA: {e}")
+            print(f"ERROR GENERAL EN VISTA: {e}")
             messages.error(request, f'Error al actualizar el alumno: {str(e)}')
     
     context = {

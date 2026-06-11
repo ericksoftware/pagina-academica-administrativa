@@ -1,5 +1,0 @@
-💡 Credenciales de acceso:
-   Control Escolar: control@benune.edu.mx / Control123
-   Directivo:      directivo@benune.edu.mx / Directivo123
-   Docente:        docente@benune.edu.mx / Docente123
-   Admin:          admin@benune.edu.mx / Admin123

@@ -42,7 +42,7 @@ Configura la base de datos en `settings.py` reemplazando la sección `DATABASES`
 
     'ENGINE': 'django.db.backends.postgresql',
 
-    'NAME': 'benune_db',
+    'NAME': 'wasisv_uni_db',
 
     'USER': 'postgres',
 

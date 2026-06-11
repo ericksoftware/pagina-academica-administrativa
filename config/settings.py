@@ -19,6 +19,13 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+def env_bool(name, default=False):
+    return os.getenv(str(name), str(default)).strip().lower() in ["1", "true", "yes", "on"]
+
+
+def env_list(name, default=""):
+    value = os.getenv(name, default)
+    return [item.strip() for item in value.split(",") if item.strip()]
 
 ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')
 
@@ -44,12 +51,37 @@ else:
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+    "django-insecure-wasisv-demo-local-change-this"
+)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env_bool("DEBUG", True)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env_list(
+    "ALLOWED_HOSTS",
+    "localhost,127.0.0.1"
+)
+
+SITE_NAME = os.getenv("SITE_NAME", "WASISV")
+SITE_SHORT_NAME = os.getenv("SITE_SHORT_NAME", "WASISV")
+SITE_DESCRIPTION = os.getenv(
+    "SITE_DESCRIPTION",
+    "Sistema académico demo para portafolio profesional"
+)
+SITE_EMAIL_DOMAIN = os.getenv("SITE_EMAIL_DOMAIN", "wasisv.com")
+SITE_CONTACT_EMAIL = os.getenv("SITE_CONTACT_EMAIL", "admin@wasisv.com")
+
+DEMO_LOGIN_PASSWORD = os.getenv("DEMO_LOGIN_PASSWORD", "12345678")
+
+DEMO_DELETE_PASSWORD_ALUMNOS = os.getenv("del_al_pass", "12345678")
+DEMO_DELETE_PASSWORD_USUARIOS = os.getenv("del_us_pass", "12345678")
+DEMO_DELETE_PASSWORD_CARRERAS = os.getenv("del_ca_pass", "12345678")
+
+CSRF_TRUSTED_ORIGINS = env_list(
+    "CSRF_TRUSTED_ORIGINS",
+    ""
+)
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
@@ -101,6 +133,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.site_branding',
             ],
         },
     },
@@ -113,23 +146,14 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-
-'default': {
-
-'ENGINE': 'django.db.backends.postgresql',
-
-'NAME': 'benune_db',
-
-'USER': 'postgres',
-
-'PASSWORD': '1234',
-
-'HOST': 'localhost',
-
-'PORT': '5432',
-
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME', 'wasisv_uni_db'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', '1234'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
-
 }
 
 # Password validation

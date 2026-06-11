@@ -1,0 +1,139 @@
+﻿WASI Academic_SISTEMA/
+|-- administracion/
+|   |-- migrations/
+|   |   |-- 0001_initial.py
+|   |   |-- 0002_configuracionsistema_firma_derecha_constancia_and_more.py
+|   |   |-- 0003_configuracionsistema_costo_constancia.py
+|   |   \-- __init__.py
+|   |-- __init__.py
+|   |-- admin.py
+|   |-- apps.py
+|   |-- models.py
+|   |-- tests.py
+|   |-- urls.py
+|   \-- views.py
+|-- alumnos/
+|   |-- migrations/
+|   |   |-- 0001_initial.py
+|   |   |-- 0002_initial.py
+|   |   |-- 0003_alumno_grupo.py
+|   |   |-- 0004_alter_alumno_email_institucional_alter_alumno_sexo.py
+|   |   \-- __init__.py
+|   |-- __init__.py
+|   |-- admin.py
+|   |-- apps.py
+|   |-- credenciales.txt
+|   |-- models.py
+|   |-- tests.py
+|   |-- urls.py
+|   \-- views.py
+|-- config/
+|   |-- __init__.py
+|   |-- asgi.py
+|   |-- settings.py
+|   |-- urls.py
+|   \-- wsgi.py
+|-- constancias/
+|   |-- migrations/
+|   |   |-- 0001_initial.py
+|   |   |-- 0002_constancia_firma_derecha_constancia_firma_izquierda.py
+|   |   |-- 0003_constancia_costo.py
+|   |   |-- 0004_constancia_lema_anio.py
+|   |   \-- __init__.py
+|   |-- __init__.py
+|   |-- admin.py
+|   |-- apps.py
+|   |-- models.py
+|   |-- tests.py
+|   |-- urls.py
+|   \-- views.py
+|-- core/
+|   |-- migrations/
+|   |   \-- __init__.py
+|   |-- __init__.py
+|   |-- admin.py
+|   |-- apps.py
+|   |-- decorators.py
+|   |-- encryption.py
+|   |-- fields.py
+|   |-- models.py
+|   |-- tests.py
+|   |-- urls.py
+|   \-- views.py
+|-- evaluaciones/
+|   |-- migrations/
+|   |   |-- 0001_initial.py
+|   |   |-- 0002_alter_calificacion_unique_together_and_more.py
+|   |   |-- 0003_materia_parciales_materia_unidad_nueva_and_more.py
+|   |   |-- 0004_finalizar_unidad_materia.py
+|   |   |-- 0005_alter_calificacion_options_and_more.py
+|   |   |-- 0006_actaevaluacion_archivo_excel_and_more.py
+|   |   \-- __init__.py
+|   |-- __init__.py
+|   |-- admin.py
+|   |-- apps.py
+|   |-- models.py
+|   |-- tests.py
+|   |-- urls.py
+|   \-- views.py
+|-- media/
+|   |-- actas/
+|   |   \-- .gitkeep
+|   \-- constancias/
+|       \-- .gitkeep
+|-- static/
+|   \-- img/
+|       |-- logobc.jpg
+|       \-- logobn.jpg
+|-- templates/
+|   |-- administracion/
+|   |   \-- administration_home.html
+|   |-- alumnos/
+|   |   |-- student_confirm_delete.html
+|   |   |-- student_detail.html
+|   |   |-- student_form.html
+|   |   \-- student_list.html
+|   |-- constancias/
+|   |   |-- certificate_list.html
+|   |   |-- certificate_template.html
+|   |   |-- generate_certificate.html
+|   |   \-- view_certificate.html
+|   |-- core/
+|   |   |-- 403.html
+|   |   \-- dashboard.html
+|   |-- evaluaciones/
+|   |   |-- carreras/
+|   |   |   |-- detalle_carrera.html
+|   |   |   |-- form_carrera.html
+|   |   |   \-- lista_carreras.html
+|   |   |-- plantillas/
+|   |   |   \-- acta_evaluacion_base.xlsx
+|   |   |-- acta_list.html
+|   |   |-- acta_template.html
+|   |   |-- generate_acta.html
+|   |   \-- view_acta.html
+|   |-- registration/
+|   |   \-- login.html
+|   |-- usuarios/
+|   |   |-- user_confirm_delete.html
+|   |   |-- user_detail.html
+|   |   |-- user_form.html
+|   |   \-- user_list.html
+|   \-- base.html
+|-- usuarios/
+|   |-- migrations/
+|   |   |-- 0001_initial.py
+|   |   |-- 0002_alter_usuario_sexo.py
+|   |   \-- __init__.py
+|   |-- __init__.py
+|   |-- admin.py
+|   |-- apps.py
+|   |-- backends.py
+|   |-- models.py
+|   |-- tests.py
+|   |-- urls.py
+|   \-- views.py
+|-- .env.example
+|-- manage.py
+|-- README.md
+\-- requirements.txt

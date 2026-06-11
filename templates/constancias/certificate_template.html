@@ -1,192 +1,243 @@
-{% load static %}<!DOCTYPE html>
-  <html lang="es">
-  <head>
-    <meta charset="utf-8">
-    <style>
-      @page { size: letter; margin: 5mm 18mm 7mm 18mm; }
-      html, body { font-family: "Times New Roman", serif; color:#000; line-height:1.20; }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <style>
+    @page { size: letter; margin: 12mm 18mm 10mm 18mm; }
 
-      .u-center { text-align:center; }
-      .u-right  { text-align:right; }
-      .u-justify{ text-align:justify; }
-      .u-mt-8   { margin-top:4mm; }
-
-      .u-small {
-      display: block;
-      margin-top: 1mm;  
-      font-size: 8pt;
-      color: #666;
-      text-align: center;
-      }
-
-      .header { position: relative; min-height: 42mm; margin-bottom: 6mm; ; }
-      .header-grid { display: block; width:100%; }
-      .col-left  { float:left;  width:12%; min-height: 40mm; margin-left: -8mm; text-align: center; margin-bottom: -10mm;; }
-      .col-right { float:right; width:88%; min-height: 40mm; text-align:right; color:#888; font-size:11pt; letter-spacing: .2pt; margin-right: -10mm; margin-top: 2mm; line-height:1.4 ; }
-      .logo-box  { width: 36mm; height: 36mm; border: 1px dashed #bbb; margin-top: 2mm; display:inline-block; text-align:center; font-size:9pt; color:#999; line-height: 36mm;  }
-      .logo-img  { max-width:30mm; max-height:30mm; vertical-align:middle; opacity: 0.35;  }
-
-      .brand-center{
-      position: relative;      
-        width: 100%;
-        text-align: center;        
-        margin-top: -6mm;         
-        margin-bottom: 3mm;   
-        pointer-events: none;
-    
-      }
-
-      .brand-center img{
-        display: inline-block;     
-        max-width: 45mm;
-        max-height: 45mm;
-        opacity: .75  ;
-        transform: translateY(4mm);
-      
+    html, body {
+      font-family: "Times New Roman", serif;
+      color: #000;
+      line-height: 1.25;
     }
 
+    .u-center { text-align: center; }
+    .u-right { text-align: right; }
+    .u-justify { text-align: justify; }
 
-      .motto { margin-top: -1mm; margin-bottom: 6mm; text-align:center; font-style: italic; color:#b22222; font-size: 11pt; }
-
-      .subject {text-align: right; margin-bottom: 6mm; font-size: 12pt; }
-      .subject .label { font-weight:bold; }
-      .subject .value { text-decoration: underline; }
-
-    
-      .title-to { font-weight:bold; }
-      .paragraph { text-align:justify; margin: 0 0 4.8mm 0; }
-      .strong { font-weight:bold; }
-      .sc { font-variant: small-caps; letter-spacing: .6pt; }
-
-      .brand-center-fixed {
+    .header {
       text-align: center;
-      margin-top: -4mm;   
-      margin-bottom: 2mm; 
-          }
+      margin-bottom: 12mm;
+      padding-bottom: 5mm;
+      border-bottom: 1px solid #222;
+    }
 
-      .brand-center-fixed img {
-      max-width: 55mm;
-      max-height: 55mm;
-      opacity: 0.22;      
-          }
+    .brand-name {
+      font-size: 20pt;
+      font-weight: bold;
+      letter-spacing: 1.5pt;
+      margin-bottom: 2mm;
+    }
 
-  
-      .attn { text-align:center; margin-top: 12mm; letter-spacing: 3.5pt; }
+    .brand-subtitle {
+      font-size: 11pt;
+      color: #555;
+      letter-spacing: .4pt;
+    }
 
-      .signatures { margin-top: 26mm; display:block; width:100%; overflow:hidden; }
-      .sig-col   { width:48%; text-align:center; }
-      .sig-left  { float:left; }
-      .sig-right { float:right; }
-      .sig-line  { width:75%; border-top:1px solid #000; margin: 0 auto 3mm auto; height:0; }
-      .sig-name  { font-weight:bold; }
-      .sig-role  { font-size: 11pt; }
+    .demo-label {
+      display: inline-block;
+      margin-top: 3mm;
+      padding: 1.5mm 4mm;
+      border: 1px solid #999;
+      font-size: 9pt;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: .8pt;
+    }
 
-      .footer { margin-top: 18mm; text-align:center; font-size:10pt; color:#666; line-height:1.35; }
-      .footer a { color:#666; text-decoration:none; } 
-    </style>
-  </head>
-  <body> 
+    .motto {
+      margin-top: 2mm;
+      margin-bottom: 8mm;
+      text-align: center;
+      font-style: italic;
+      color: #555;
+      font-size: 11pt;
+    }
 
-    <header class="header">
-      <div class="header-grid">
-        <div class="col-left u-center">
-          <img class="logo-img"
-              src="{% if logo_izquierdo %}{{ logo_izquierdo }}{% else %}{% static 'img/logobc.jpg' %}{% endif %}"
-              alt="Logo izquierdo">
-          <div class="u-small u-mt-8">GOBIERNO DEL ESTADO DE BAJA CALIFORNIA</div>
-        </div>
+    .subject {
+      text-align: right;
+      margin-bottom: 8mm;
+      font-size: 12pt;
+    }
 
-        <div class="col-right">
-          <div><strong>SECRETARÍA DE EDUCACIÓN</strong></div>
-          <div>SUBSECRETARÍA DE EDUCACIÓN MEDIA SUPERIOR, SUPERIOR E INVESTIGACIÓN</div>
-          <div>DIRECCIÓN DE EDUCACIÓN SUPERIOR PARA PROFESIONALES DE LA EDUCACIÓN</div>
-          <div><strong>BENEMÉRITA ESCUELA NORMAL URBANA NOCTURNA DEL ESTADO</strong></div>
-          <div><em>ING. JOSÉ G. VALENZUELA</em></div>
-        </div>
-      </div>
+    .subject .label {
+      font-weight: bold;
+    }
 
-  
-    </header>
+    .subject .value {
+      text-decoration: underline;
+    }
 
-      <div class="brand-center">
-        {% if logo_central %}
-          <img src="{{ logo_central }}" alt="Marca BENUNE">
-        {% endif %}
-      </div>
+    .title-to {
+      font-weight: bold;
+      margin-bottom: 5mm;
+    }
 
-    <div class="motto">
-        "{{ constancia.lema_anio }}"
+    .paragraph {
+      text-align: justify;
+      margin: 0 0 5mm 0;
+      font-size: 12pt;
+    }
+
+    .strong {
+      font-weight: bold;
+    }
+
+    .sc {
+      font-variant: small-caps;
+      letter-spacing: .6pt;
+    }
+
+    .attn {
+      text-align: center;
+      margin-top: 14mm;
+      letter-spacing: 3.5pt;
+    }
+
+    .signatures {
+      margin-top: 28mm;
+      display: block;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .sig-col {
+      width: 48%;
+      text-align: center;
+    }
+
+    .sig-left {
+      float: left;
+    }
+
+    .sig-right {
+      float: right;
+    }
+
+    .sig-line {
+      width: 75%;
+      border-top: 1px solid #000;
+      margin: 0 auto 3mm auto;
+      height: 0;
+    }
+
+    .sig-name {
+      font-weight: bold;
+    }
+
+    .sig-role {
+      font-size: 11pt;
+    }
+
+    .footer {
+      margin-top: 20mm;
+      padding-top: 4mm;
+      border-top: 1px solid #ccc;
+      text-align: center;
+      font-size: 10pt;
+      color: #666;
+      line-height: 1.35;
+    }
+
+    .footer a {
+      color: #666;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <div class="brand-name">{{ SITE_NAME|default:"WASISV" }}</div>
+    <div class="brand-subtitle">
+      Sistema académico demo para portafolio profesional
     </div>
+    <div class="demo-label">
+      Proyecto demostrativo
+    </div>
+  </header>
 
-    <section class="subject">
-      <span class="label">Asunto:</span>
-      <span class="value">CONSTANCIA DE ESTUDIOS</span>
-    </section>
-
-    <main>
-      <p class="title-to">A QUIEN CORRESPONDA:</p>
-
-      <p class="paragraph">
-        Quien suscribe <span class="strong">{{ constancia.firma_derecha }}</span> Director(a) de la
-        <span class="strong">BENEMÉRITA ESCUELA NORMAL URBANA NOCTURNA DEL ESTADO. ING. JOSÉ G. VALENZUELA</span>,
-        con clave <span class="strong">02ENL0004Y</span>, hace constar que según documentos que se encuentran en los archivos
-        de esta Institución, la(el) C. <span class="strong sc">{{ constancia.alumno.nombre_completo }}</span>
-        con número de matrícula <span class="strong">{{ constancia.alumno.matricula }}</span> y CURP:
-        <span class="strong">{{ constancia.alumno.curp }}</span>, es alumno(a) regular y se encuentra inscrito(a)
-        en el <span class="strong">{{ constancia.alumno.semestre_actual }}°</span> semestre, turno
-        <span class="strong">{{ constancia.alumno.get_turno_display }}</span> de la
-        <span class="strong">{{ constancia.alumno.carrera.nombre|default:"Licenciatura" }}</span>
-        {% if constancia.alumno.plan %} plan de estudios <span class="strong">{{ constancia.alumno.plan }}</span>{% endif %}.
-      </p>
-
-
-<p class="paragraph">
-  Se otorga la presente constancia para los fines legales que a la parte interesada convengan
-  en la Ciudad de Mexicali, Baja California, México, a los
-  {# --- Caso 1: si es date/datetime, el filtro date funciona --- #}
-  {% if constancia.fecha_emision|date:"Y" != "" %}
-    <span class="strong">{{ constancia.fecha_emision|date:"d" }}</span> días del mes de
-    <span class="strong">{{ constancia.fecha_emision|date:"F" }}</span> del
-    <span class="strong">{{ constancia.fecha_emision|date:"Y" }}</span>.
-  {% else %}
-  {# --- Caso 2: si es string "YYYY-MM-DD", lo partimos --- #}
-    {% with fe=constancia.fecha_emision|stringformat:"s" %}
-      {% with y=fe|slice:":4" m=fe|slice:"5:7" d=fe|slice:"8:10" %}
-        <span class="strong">{{ d }}</span> días del mes de
-        <span class="strong">
-          {% if m == "01" %}Enero{% elif m == "02" %}Febrero{% elif m == "03" %}Marzo
-          {% elif m == "04" %}Abril{% elif m == "05" %}Mayo{% elif m == "06" %}Junio
-          {% elif m == "07" %}Julio{% elif m == "08" %}Agosto{% elif m == "09" %}Septiembre
-          {% elif m == "10" %}Octubre{% elif m == "11" %}Noviembre{% elif m == "12" %}Diciembre{% endif %}
-        </span> del
-        <span class="strong">{{ y }}</span>.
-      {% endwith %}
-    {% endwith %}
+  {% if constancia.lema_anio %}
+  <div class="motto">
+    "{{ constancia.lema_anio }}"
+  </div>
   {% endif %}
-</p>  
 
-      <div class="attn">A T E N T A M E N T E</div>
+  <section class="subject">
+    <span class="label">Asunto:</span>
+    <span class="value">CONSTANCIA DE ESTUDIOS</span>
+  </section>
 
-      <section class="signatures">
-        <div class="sig-col sig-left">
-          <div class="sig-line"></div>
-          <div class="sig-name">{{ constancia.firma_izquierda }}</div>
-          <div class="sig-role">BENUNE</div>
-        </div>
-        <div class="sig-col sig-right">
-          <div class="sig-line"></div>
-          <div class="sig-name">{{ constancia.firma_derecha }}</div>
-          <div class="sig-role">Director(a) de BENUNE</div>
-        </div>
-        <div style="clear: both;"></div>
-      </section>
-    </main>
+  <main>
+    <p class="title-to">A QUIEN CORRESPONDA:</p>
 
-    <footer class="footer">
-      <div>AV. JUAN ESCUTIA Y RÍO SAN LORENZO S/N, COL. PRO-HOGAR, MEXICALI, B.C., C.P. 21240</div>
-      <div>Tel. (686) 566 14 95</div>
-      <div><a href="mailto:benunedireccion@gmail.com">benunedireccion@gmail.com</a></div>
-    </footer>
+    <p class="paragraph">
+      Quien suscribe <span class="strong">{{ constancia.firma_derecha }}</span>, responsable académico(a) de
+      <span class="strong">{{ SITE_NAME|default:"WASISV" }}</span>, hace constar que según los registros
+      disponibles en este sistema, la(el) C.
+      <span class="strong sc">{{ constancia.alumno.nombre_completo }}</span>,
+      con número de matrícula <span class="strong">{{ constancia.alumno.matricula }}</span>
+      y CURP: <span class="strong">{{ constancia.alumno.curp }}</span>,
+      es alumno(a) regular y se encuentra inscrito(a) en el
+      <span class="strong">{{ constancia.alumno.semestre_actual }}°</span> semestre,
+      turno <span class="strong">{{ constancia.alumno.get_turno_display }}</span>
+      de la <span class="strong">{{ constancia.alumno.carrera.nombre|default:"Carrera" }}</span>
+      {% if constancia.alumno.plan %}
+      plan de estudios <span class="strong">{{ constancia.alumno.plan }}</span>
+      {% endif %}.
+    </p>
 
-  </body>
-  </html>
+    <p class="paragraph">
+      Se otorga la presente constancia para los fines que a la parte interesada convengan,
+      a los
+      {% if constancia.fecha_emision|date:"Y" != "" %}
+        <span class="strong">{{ constancia.fecha_emision|date:"d" }}</span> días del mes de
+        <span class="strong">{{ constancia.fecha_emision|date:"F" }}</span> del
+        <span class="strong">{{ constancia.fecha_emision|date:"Y" }}</span>.
+      {% else %}
+        {% with fe=constancia.fecha_emision|stringformat:"s" %}
+          {% with y=fe|slice:":4" m=fe|slice:"5:7" d=fe|slice:"8:10" %}
+            <span class="strong">{{ d }}</span> días del mes de
+            <span class="strong">
+              {% if m == "01" %}Enero{% elif m == "02" %}Febrero{% elif m == "03" %}Marzo
+              {% elif m == "04" %}Abril{% elif m == "05" %}Mayo{% elif m == "06" %}Junio
+              {% elif m == "07" %}Julio{% elif m == "08" %}Agosto{% elif m == "09" %}Septiembre
+              {% elif m == "10" %}Octubre{% elif m == "11" %}Noviembre{% elif m == "12" %}Diciembre{% endif %}
+            </span> del
+            <span class="strong">{{ y }}</span>.
+          {% endwith %}
+        {% endwith %}
+      {% endif %}
+    </p>
+
+    <div class="attn">A T E N T A M E N T E</div>
+
+    <section class="signatures">
+      <div class="sig-col sig-left">
+        <div class="sig-line"></div>
+        <div class="sig-name">{{ constancia.firma_izquierda }}</div>
+        <div class="sig-role">{{ SITE_SHORT_NAME|default:"WASISV" }}</div>
+      </div>
+
+      <div class="sig-col sig-right">
+        <div class="sig-line"></div>
+        <div class="sig-name">{{ constancia.firma_derecha }}</div>
+        <div class="sig-role">Responsable académico(a)</div>
+      </div>
+
+      <div style="clear: both;"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div>{{ SITE_NAME|default:"WASISV" }} · Sistema académico demo</div>
+    <div>Proyecto de muestra para portafolio profesional</div>
+    <div>
+      <a href="mailto:{{ SITE_CONTACT_EMAIL|default:'admin@wasisv.com' }}">
+        {{ SITE_CONTACT_EMAIL|default:"admin@wasisv.com" }}
+      </a>
+    </div>
+  </footer>
+</body>
+</html>

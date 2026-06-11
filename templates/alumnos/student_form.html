@@ -251,16 +251,16 @@
                         <input type="text" class="form-control" id="email_institucional" name="email_institucional" 
                                value="{{ alumno.email_institucional|default:'PENDIENTE' }}"
                                list="email_suggestions"
-                               placeholder="PENDIENTE o usuario@edubc.mx">
+                               placeholder="PENDIENTE o usuario@wasisv.com">
                         <datalist id="email_suggestions">
                             <option value="PENDIENTE">
-                            <option value="usuario@edubc.mx">
+                            <option value="usuario@wasisv.com">
                         </datalist>
                         <div class="form-text">
-                            Debe terminar con <strong>@edubc.mx</strong> o ser <strong>"PENDIENTE"</strong> si no tiene correo asignado.
+                            Debe terminar con <strong>@wasisv.com</strong> o ser <strong>"PENDIENTE"</strong> si no tiene correo asignado.
                         </div>
                         <div id="email_institucional_feedback" class="invalid-feedback">
-                            El correo institucional debe terminar con @edubc.mx o ser "PENDIENTE"
+                            El correo institucional debe terminar con @wasisv.com o ser "PENDIENTE"
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -335,7 +335,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const emailNormalizado = valor.toLowerCase();
 
-        return emailNormalizado.endsWith('@edubc.mx') && emailNormalizado.includes('@');
+        return emailNormalizado.endsWith('@wasisv.com') && emailNormalizado.includes('@');
     }
     
     // Función para validar email personal
@@ -458,7 +458,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (isValid) emailInstitucional.focus();
         } else if (!validarEmailInstitucional(emailInst)) {
             isValid = false;
-            errores.push('El correo institucional debe terminar con @edubc.mx o ser "Pendiente"');
+            errores.push('El correo institucional debe terminar con @wasisv.com o ser "Pendiente"');
             if (isValid) emailInstitucional.focus();
         }
         

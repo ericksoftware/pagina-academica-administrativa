@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}BENUNE - Sistema de Gestión{% endblock %}</title>
+    <title>{% block title %}{{ SITE_SHORT_NAME|default:"WASISV" }} - Sistema de Gestión{% endblock %}</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,7 +13,7 @@
     
     <style>
         :root {
-            --color-primary: #831012;
+            --color-primary: #236e3a;
             --color-secondary: #085a2a;
             --color-light: #f8f9fa;
             --color-dark: #343a40;
@@ -270,7 +270,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom py-2">
         <div class="container">
             <a class="navbar-brand" href="{% url 'dashboard' %}">
-                <i class="fas fa-graduation-cap"></i>BENUNE
+                <i class="fas fa-graduation-cap"></i>{{ SITE_SHORT_NAME|default:"WASISV" }}
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -393,13 +393,13 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5>BENEMÉRITA ESCUELA NORMAL URBANA NOCTURNA DEL ESTADO</h5>
-                    <p>Ing. José G. Valenzuela</p>
-                    <p>AV. JUAN ESCUTIA Y RIO SAN LORENZO S/N COL. PRO-HOGAR. MEXICALI, B.C.</p>
+                    <h5>{{ SITE_NAME|default:"WASISV" }}</h5>
+                    <p>{{ SITE_DESCRIPTION|default:"Sistema académico demo para portafolio profesional" }}</p>
+                    <p class="mb-0">Proyecto demostrativo desplegado en servidor privado.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <p>Sistema de Gestión Administrativa</p>
-                    <p>© {% now "Y" %} - Todos los derechos reservados</p>
+                    <p>Sistema de Gestión Académica</p>
+                    <p>© {% now "Y" %} - Proyecto demo</p>
                 </div>
             </div>
         </div>

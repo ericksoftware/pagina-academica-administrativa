@@ -1,7 +1,7 @@
 <!-- templates/alumnos/student_confirm_delete.html -->
 {% extends "base.html" %}
 
-{% block title %}Eliminar Alumno - BENUNE{% endblock %}
+{% block title %}Eliminar Alumno - {{ SITE_SHORT_NAME|default:"WASISV" }}{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -15,12 +15,12 @@
                 </div>
                 <div class="card-body">
                     <p class="lead">¿Estás seguro de que deseas eliminar al siguiente alumno?</p>
-                    
+
                     <div class="alert alert-warning">
                         <h5 class="alert-heading">{{ alumno.nombre_completo }}</h5>
                         <p class="mb-0">
                             <strong>Matrícula:</strong> {{ alumno.matricula|default:"PENDIENTE" }}<br>
-                            <strong>Carrera:</strong> 
+                            <strong>Carrera:</strong>
                             {% if alumno.carrera %}
                                 {{ alumno.carrera.nombre }}
                             {% else %}
@@ -28,14 +28,34 @@
                             {% endif %}
                         </p>
                     </div>
-                    
+
                     <p class="text-danger">
-                        <strong>¡Advertencia!</strong> Esta acción no se puede deshacer y se eliminarán 
+                        <strong>¡Advertencia!</strong> Esta acción no se puede deshacer y se eliminarán
                         todos los datos asociados al alumno, incluyendo calificaciones y constancias.
                     </p>
-                    
+
                     <form method="post">
                         {% csrf_token %}
+
+                        <div class="alert alert-info">
+                            Para esta demo, la clave de eliminación de alumnos es:
+                            <code>{{ DEMO_DELETE_PASSWORD_ALUMNOS|default:"12345678" }}</code>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="delete_password" class="form-label">
+                                Clave de eliminación *
+                            </label>
+                            <input
+                                type="password"
+                                name="delete_password"
+                                id="delete_password"
+                                class="form-control"
+                                placeholder="Ingresa la clave de eliminación"
+                                required
+                            >
+                        </div>
+
                         <div class="d-flex gap-2 justify-content-end">
                             <a href="{% url 'student_detail' alumno.id %}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left me-2"></i>Cancelar

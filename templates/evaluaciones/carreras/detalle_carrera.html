@@ -2,7 +2,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ page_title }} - BENUNE{% endblock %}
+{% block title %}{{ page_title }} - {{ SITE_SHORT_NAME|default:"WASISV" }}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -51,6 +51,11 @@
                         <small class="text-danger">
                             Esta acción no se puede deshacer y eliminará todas las unidades y materias asociadas.
                         </small>
+
+                        <div class="alert alert-info mt-3 mb-0">
+                            Para esta demo, la clave de eliminación de carreras es:
+                            <code>{{ DEMO_DELETE_PASSWORD_CARRERAS|default:"12345678" }}</code>
+                        </div>
 
                         <div class="mt-3">
                             <label for="careerDeletePassword" class="form-label">

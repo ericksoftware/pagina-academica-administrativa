@@ -12,6 +12,10 @@ from django.core.exceptions import ValidationError
 from decimal import Decimal, InvalidOperation
 import os
 import secrets
+from django.conf import settings
+
+def get_institutional_email_domain():
+    return getattr(settings, "SITE_EMAIL_DOMAIN", "wasisv.com").strip().lower().lstrip("@")
 
 def validar_clave_eliminacion(request, variable_env):
     clave_configurada = os.getenv(variable_env, '').strip()
@@ -231,8 +235,10 @@ def student_create(request):
                         break
             
             if email_institucional not in ['PENDIENTE', 'N/A']:
-                if not email_institucional.endswith('@edubc.mx'):
-                    errores.append('El correo institucional debe terminar con @edubc.mx')
+                domain = get_institutional_email_domain()
+
+                if not email_institucional.endswith(f'@{domain}'):
+                    errores.append(f'El correo institucional debe terminar con @{domain}')
                 else:
                     for alumno_existente in Alumno.objects.all():
                         if alumno_existente.email_institucional == email_institucional:
@@ -400,8 +406,10 @@ def student_edit(request, student_id):
             
             if (nuevo_email_institucional not in ['PENDIENTE', 'N/A'] and 
                 nuevo_email_institucional != alumno.email_institucional):
-                if not nuevo_email_institucional.endswith('@edubc.mx'):
-                    errores.append('El correo institucional debe terminar con @edubc.mx')
+                domain = get_institutional_email_domain()
+
+                if not nuevo_email_institucional.endswith(f'@{domain}'):
+                    errores.append(f'El correo institucional debe terminar con @{domain}')
                 else:
                     for alumno_existente in Alumno.objects.exclude(pk=alumno.pk):
                         if alumno_existente.email_institucional == nuevo_email_institucional:

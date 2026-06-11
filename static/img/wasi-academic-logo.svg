@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="WASI Academic logo">
+  <rect width="256" height="256" rx="56" fill="#1f4fd8"/>
+  <path d="M44 92l84-42 84 42-84 42-84-42z" fill="#fff" opacity=".95"/>
+  <path d="M74 117v43c0 22 108 22 108 0v-43l-54 27-54-27z" fill="#fff" opacity=".85"/>
+  <path d="M206 98v58" stroke="#0f766e" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="206" cy="172" r="12" fill="#0f766e"/>
+</svg>

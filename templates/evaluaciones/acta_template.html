@@ -1,83 +1,131 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="utf-8">
     <title>Acta de Evaluación - {{ acta.materia.nombre }}</title>
+
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
+        body {
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             font-size: 12px;
         }
-        .header { 
-            text-align: center; 
+
+        .header {
+            text-align: center;
             margin-bottom: 10px;
             border-bottom: 2px solid #000;
             padding-bottom: 10px;
         }
-        .title { 
-            text-align: center; 
+
+        .brand-name {
+            font-weight: bold;
+            font-size: 15px;
+            letter-spacing: 1px;
+        }
+
+        .brand-subtitle {
+            font-size: 11px;
+            color: #555;
+            margin-top: 3px;
+        }
+
+        .demo-label {
+            font-size: 10px;
+            color: #666;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+        }
+
+        .title {
+            text-align: center;
             margin: 10px 0;
             font-weight: bold;
         }
-        .info-table { 
-            width: 100%; 
-            margin-bottom: 15px; 
+
+        .info-table {
+            width: 100%;
+            margin-bottom: 15px;
             border-collapse: collapse;
             font-size: 11px;
         }
-        .info-table td { 
-            padding: 3px 5px; 
+
+        .info-table td {
+            padding: 3px 5px;
             border: 1px solid #000;
             vertical-align: top;
         }
-        .grades-table { 
-            width: 100%; 
-            border-collapse: collapse; 
+
+        .grades-table {
+            width: 100%;
+            border-collapse: collapse;
             margin-bottom: 15px;
             font-size: 10px;
         }
-        .grades-table th, .grades-table td { 
-            border: 1px solid #000; 
+
+        .grades-table th,
+        .grades-table td {
+            border: 1px solid #000;
             padding: 4px;
             text-align: center;
         }
-        .grades-table th { 
+
+        .grades-table th {
             background-color: #f2f2f2;
             font-weight: bold;
         }
-        .signatures { 
-            display: flex; 
-            justify-content: space-between; 
+
+        .signatures {
+            display: flex;
+            justify-content: space-between;
             margin-top: 40px;
         }
-        .signature { 
-            text-align: center; 
-            width: 45%; 
+
+        .signature {
+            text-align: center;
+            width: 45%;
         }
-        .signature-line { 
-            border-top: 1px solid #000; 
+
+        .signature-line {
+            border-top: 1px solid #000;
             margin: 30px 0 5px;
         }
-        .section-title { 
-            background-color: #d9d9d9; 
-            padding: 5px; 
-            margin: 10px 0 5px; 
-            text-align: center; 
+
+        .section-title {
+            background-color: #d9d9d9;
+            padding: 5px;
+            margin: 10px 0 5px;
+            text-align: center;
             font-weight: bold;
             font-size: 11px;
         }
-        .no-border { border: none !important; }
-        .text-left { text-align: left !important; }
-        .page-break { page-break-after: always; }
+
+        .no-border {
+            border: none !important;
+        }
+
+        .text-left {
+            text-align: left !important;
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
     </style>
 </head>
+
 <body>
     <div class="header">
-        <div style="font-weight: bold; font-size: 14px;">
-            BENEMÉRITA ESCUELA NORMAL URBANA NOCTURNA DEL ESTADO<br>
-            "ING. JOSÉ G. VALENZUELA"
+        <div class="brand-name">
+            {{ SITE_NAME|default:"WASISV" }}
+        </div>
+        <div class="brand-subtitle">
+            Sistema académico demo para portafolio profesional
+        </div>
+        <div class="demo-label">
+            Proyecto demostrativo
         </div>
     </div>
 
@@ -116,9 +164,10 @@
                 <th width="8%">UNIDAD 2</th>
                 <th width="10%">EVIDENCIA FINAL</th>
                 <th width="12%">EVALUACIÓN GLOBAL</th>
-                <th width="15%">NASISTENCIAS</th>
+                <th width="15%">INASISTENCIAS</th>
             </tr>
         </thead>
+
         <tbody>
             {% for alumno in alumnos %}
             <tr>
@@ -146,10 +195,11 @@
             <strong>DOCENTE</strong><br>
             {{ docente_nombre|default:"Nombre del Docente" }}
         </div>
+
         <div class="signature">
             <div class="signature-line"></div>
-            <strong>DIRECTOR(A)</strong><br>
-            Dr(a). Liuba Abiyova Téllez Osuna
+            <strong>RESPONSABLE ACADÉMICO(A)</strong><br>
+            {{ responsable_academico|default:"WASISV" }}
         </div>
     </div>
 </body>

@@ -2,7 +2,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ page_title }} - BENUNE{% endblock %}
+{% block title %}{{ page_title }} - {{ SITE_SHORT_NAME|default:"WASISV" }}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -45,7 +45,7 @@
                                 <label for="nombre" class="form-label">Nombre de la Carrera *</label>
                                 <input type="text" class="form-control" id="nombre" name="nombre" 
                                        value="{{ carrera.nombre|default:'' }}" required
-                                       placeholder="Ej: INCLUSIÓN EDUCATIVA">
+                                       placeholder="Ej: Ingeniería en Software">
                             </div>
                             
                             <div class="col-md-6 mb-3">
@@ -65,7 +65,7 @@
                                 <label for="codigo" class="form-label">Código de Unidades *</label>
                                 <input type="text" class="form-control" id="codigo" name="codigo" 
                                        value="{{ carrera.codigo|default:'' }}" required
-                                       placeholder="Ej: LIE" maxlength="10">
+                                       placeholder="Ej: ISW" maxlength="10">
                                 <div class="form-text">Iniciales para las unidades</div>
                             </div>
                             
@@ -98,7 +98,7 @@
                             <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Información sobre unidades</h6>
                             <p class="mb-2"><strong>Las unidades se crearán automáticamente con el formato:</strong></p>
                             <p class="mb-1"><code>[CÓDIGO][AÑO_PLAN][NÚMERO_UNIDAD]</code></p>
-                            <p class="mb-0">Ejemplo: Para LIE, plan 2023, 2 unidades → <code>LIE2301</code>, <code>LIE2302</code></p>
+                            <p class="mb-0">Ejemplo: Para ISW, plan 2026, 2 unidades → <code>ISW2601</code>, <code>ISW2602</code></p>
                         </div>
 
                         <!-- Solo en edición mostrar estado -->

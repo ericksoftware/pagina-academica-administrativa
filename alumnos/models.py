@@ -2,7 +2,10 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from core.fields import EncryptedCharField
 import re
+from django.conf import settings
 
+def get_institutional_email_domain():
+    return getattr(settings, "SITE_EMAIL_DOMAIN", "wasisv.com").strip().lower().lstrip("@")
 
 def normalizar_email_institucional(value):
     """
@@ -53,14 +56,16 @@ def es_email_pendiente_o_na(value):
 
 
 def validate_email_domain(value):
-    """Validar que el email institucional termine con @edubc.mx"""
+    """Validar que el email institucional termine con el dominio configurado."""
     value = normalizar_email_institucional(value)
 
     if value in ['PENDIENTE', 'N/A']:
         return
 
-    if not value.endswith('@edubc.mx'):
-        raise ValidationError('El correo institucional debe terminar con @edubc.mx')
+    domain = get_institutional_email_domain()
+
+    if not value.endswith(f'@{domain}'):
+        raise ValidationError(f'El correo institucional debe terminar con @{domain}')
 
 
 def validate_email_format(value):
@@ -148,7 +153,7 @@ class Alumno(models.Model):
         max_length=500,
         default='PENDIENTE',
         validators=[validate_email_domain, validate_email_format],
-        help_text="Debe terminar con @edubc.mx. Use 'PENDIENTE' si no tiene correo asignado."
+        help_text="Debe terminar con @wasisv.com , Use 'PENDIENTE' si no tiene correo asignado."
     )
     password_email_institucional = EncryptedCharField(max_length=500, default='N/A')
     email_personal = EncryptedCharField(
@@ -241,9 +246,11 @@ class Alumno(models.Model):
 
         # Validar correo institucional único, excepto PENDIENTE / N/A
         if self.email_institucional not in ['PENDIENTE', 'N/A']:
-            if not self.email_institucional.endswith('@edubc.mx'):
+            domain = get_institutional_email_domain()
+
+            if not self.email_institucional.endswith(f'@{domain}'):
                 raise ValidationError({
-                    'email_institucional': 'El correo institucional debe terminar con @edubc.mx'
+                    'email_institucional': f'El correo institucional debe terminar con @{domain}'
                 })
 
             for alumno_existente in Alumno.objects.exclude(pk=self.pk):
@@ -300,7 +307,8 @@ class Alumno(models.Model):
         if self.email_institucional not in ['PENDIENTE', 'N/A']:
             return self.email_institucional.lower().strip()
 
-        return f"alumno_{self.id}@edubc.mx"
+        domain = get_institutional_email_domain()
+        return f"alumno_{self.id}@{domain}"
 
     def sincronizar_usuario_django(self):
         """

@@ -1,50 +1,167 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Iniciar Sesión - BENUNE{% endblock %}
+{% block title %}Iniciar Sesión - {{ SITE_SHORT_NAME|default:"WASISV" }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        min-height: 100vh;
+        padding: 24px 12px;
+    }
+
+    .login-card {
+        max-width: 980px;
+    }
+
+    .demo-user-card {
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 10px;
+        padding: 12px;
+        background: #f8f9fa;
+        height: 100%;
+    }
+
+    .demo-user-email {
+        font-family: monospace;
+        font-size: 0.92rem;
+    }
+
+    .demo-note {
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="login-container">
     <div class="login-card">
         <div class="login-header">
-            <h2><i class="fas fa-graduation-cap me-2"></i>BENUNE</h2>
-            <p class="mb-0">Sistema de Gestión Administrativa</p>
+            <h2>
+                <i class="fas fa-graduation-cap me-2"></i>{{ SITE_SHORT_NAME|default:"WASISV" }}
+            </h2>
+            <p class="mb-0">{{ SITE_DESCRIPTION|default:"Sistema académico demo para portafolio profesional" }}</p>
         </div>
-        
+
         <div class="login-body">
-            <h4 class="text-center mb-4">Iniciar Sesión</h4>
-            
-            {% if form.errors %}
-            <div class="alert alert-danger" role="alert">
-                Correo electrónico o contraseña incorrectos. Por favor, inténtelo de nuevo.
+            <div class="row g-4">
+                <div class="col-lg-5">
+                    <h4 class="text-center mb-4">Iniciar Sesión</h4>
+
+                    {% if form.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        Correo electrónico o contraseña incorrectos. Por favor, inténtelo de nuevo.
+                    </div>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'login' %}">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Correo demo *</label>
+                            <input
+                                type="email"
+                                name="username"
+                                class="form-control"
+                                id="username"
+                                placeholder="usuario@{{ SITE_EMAIL_DOMAIN|default:'wasisv.com' }}"
+                                required
+                                autofocus
+                            >
+                            <div class="form-text">
+                                Usa uno de los usuarios demo mostrados a la derecha.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Contraseña *</label>
+                            <input
+                                type="password"
+                                name="password"
+                                class="form-control"
+                                id="password"
+                                placeholder="Ingresa tu contraseña"
+                                required
+                            >
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary-custom btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Ingresar
+                            </button>
+                        </div>
+
+                        <input type="hidden" name="next" value="{{ next }}">
+                    </form>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="alert alert-info demo-note mb-3">
+                        <strong>Puedes usar estos usuarios para entrar y probar el sistema.</strong><br>
+                        Cada tipo de usuario tiene permisos y acciones diferentes.
+                    </div>
+
+                    <div class="row g-3">
+                        {% for demo_user in DEMO_USERS %}
+                        <div class="col-md-6">
+                            <div class="demo-user-card">
+                                <div class="fw-bold text-primary-custom mb-1">
+                                    <i class="fas fa-user-tag me-1"></i>{{ demo_user.role }}
+                                </div>
+
+                                <div class="demo-user-email mb-1">
+                                    {{ demo_user.email }}
+                                </div>
+
+                                <div class="small mb-2">
+                                    Contraseña:
+                                    <code>{{ demo_user.password }}</code>
+                                </div>
+
+                                <p class="small text-muted mb-2">
+                                    {{ demo_user.description }}
+                                </p>
+
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-primary btn-sm w-100 js-fill-login"
+                                    data-email="{{ demo_user.email }}"
+                                    data-password="{{ demo_user.password }}"
+                                >
+                                    Usar este usuario
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="alert alert-warning demo-note mt-3 mb-0">
+                        <strong>Claves demo para eliminar registros:</strong><br>
+                        Alumnos: <code>{{ DEMO_DELETE_PASSWORD_ALUMNOS|default:"12345678" }}</code>,
+                        Usuarios: <code>{{ DEMO_DELETE_PASSWORD_USUARIOS|default:"12345678" }}</code>,
+                        Carreras: <code>{{ DEMO_DELETE_PASSWORD_CARRERAS|default:"12345678" }}</code>.
+                    </div>
+                </div>
             </div>
-            {% endif %}
-            
-            <form method="post" action="{% url 'login' %}">
-                {% csrf_token %}
-                
-                <div class="mb-3">
-                    <label for="username" class="form-label">Correo Institucional *</label>
-                    <input type="email" name="username" class="form-control" id="username" 
-                           placeholder="usuario@institucion.edu.mx" required autofocus>
-                    <div class="form-text">Usa tu correo institucional para iniciar sesión</div>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="password" class="form-label">Contraseña *</label>
-                    <input type="password" name="password" class="form-control" id="password" 
-                           placeholder="Ingresa tu contraseña" required>
-                </div>
-                
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary-custom btn-lg">
-                        <i class="fas fa-sign-in-alt me-2"></i>Ingresar
-                    </button>
-                </div>
-                
-                <input type="hidden" name="next" value="{{ next }}">
-            </form>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const emailInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const buttons = document.querySelectorAll('.js-fill-login');
+
+    buttons.forEach(function (button) {
+        button.addEventListener('click', function () {
+            emailInput.value = button.dataset.email;
+            passwordInput.value = button.dataset.password;
+            passwordInput.focus();
+        });
+    });
+});
+</script>
 {% endblock %}

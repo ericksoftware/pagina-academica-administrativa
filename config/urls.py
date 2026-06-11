@@ -37,6 +37,6 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # Personalizar títulos del admin
-admin.site.site_header = 'BENUNE - Administración'
-admin.site.site_title = 'Sistema de Gestión BENUNE'
-admin.site.index_title = 'Panel de Administración'
+admin.site.site_header = f"{getattr(settings, 'SITE_SHORT_NAME', 'WASISV')} - Administración"
+admin.site.site_title = f"Sistema de Gestión {getattr(settings, 'SITE_SHORT_NAME', 'WASISV')}"
+admin.site.index_title = "Panel de Administración"

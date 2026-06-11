@@ -1,6 +1,6 @@
-# Benune - Aplicación Django
+# Aplicación Django
 
-Este es un proyecto Django llamado **"benune"**. A continuación, se detallan las instrucciones para clonar el repositorio y configurar el entorno de desarrollo local.
+Este es un proyecto Django. A continuación, se detallan las instrucciones para clonar el repositorio y configurar el entorno de desarrollo local.
 
 ## Prerrequisitos
 
@@ -18,11 +18,11 @@ Durante la instalación:
 - Establece la contraseña para el usuario `postgres` como `1234`.
 - Toma nota del puerto que se configura (por defecto es 5432).
 
-Una vez instalado, abre pgAdmin y crea una nueva base de datos llamada `benune_db`.
+Una vez instalado, abre pgAdmin y crea una nueva base de datos llamada `wasi_uni_db`.
 
 ## Configuración del proyecto
 
-Clona el repositorio usando: `git clone https://github.com/ericksoftware/benune.git` y entra al directorio con `cd benune`.
+Clona el repositorio usando: `git clone [https://github.com/ericksoftware/benune.git](https://github.com/ericksoftware/pagina-academica-administrativa.git)` y entra al directorio con `cd proyecto`.
 
 Crea un entorno virtual con `python -m venv venv`.
 
@@ -61,12 +61,10 @@ Aplica las migraciones con `python manage.py migrate`.
 
 Opcionalmente, crea un superusuario para acceder al admin de Django con `python manage.py createsuperuser`.
 
-Ejecuta el script para crear usuarios de prueba con `python create_test_users.py`.
-
 Finalmente, ejecuta el servidor de desarrollo con `python manage.py runserver` y abre tu navegador en [http://localhost:8000](http://localhost:8000) para ver la aplicación.
 
 ## Notas adicionales
 
 - Asegúrate de que el servicio de PostgreSQL esté ejecutándose antes de iniciar la aplicación Django.
 - Si cambias la configuración de la base de datos (contraseña, nombre de BD, etc.), actualiza el archivo `settings.py` accordingly.
-- El script `create_test_users.py` crea usuarios de prueba para poder probar la aplicación con datos iniciales.
+- El script `seed_demo_users.py` crea usuarios de prueba para poder probar la aplicación con datos iniciales.

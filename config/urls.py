@@ -8,7 +8,7 @@ from core import views as core_views
 
 urlpatterns = [
     # Administración de Django
-    path('admin/', admin.site.urls),
+    path(settings.ADMIN_URL, admin.site.urls),
     
     # Página principal
     path('', core_views.home_redirect, name='home'),

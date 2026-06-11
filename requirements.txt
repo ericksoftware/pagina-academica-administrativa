@@ -1,7 +1,9 @@
 cryptography==46.0.2
 Django==5.2.7
 docx==0.2.4
+gunicorn==26.0.0
+openpyxl>=3.1.2
 pandas==2.3.3
+psycopg[binary]==3.3.4
 python-dotenv==1.1.1
 weasyprint==66.0
-openpyxl>=3.1.2

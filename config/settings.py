@@ -27,6 +27,12 @@ def env_list(name, default=""):
     value = os.getenv(name, default)
     return [item.strip() for item in value.split(",") if item.strip()]
 
+def env_int(name, default=0):
+    try:
+        return int(os.getenv(str(name), str(default)))
+    except (TypeError, ValueError):
+        return default
+
 ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')
 
 # Validate encryption key
@@ -82,6 +88,11 @@ CSRF_TRUSTED_ORIGINS = env_list(
     "CSRF_TRUSTED_ORIGINS",
     ""
 )
+
+ADMIN_URL = os.getenv("ADMIN_URL", "admin/").strip()
+
+if not ADMIN_URL.endswith("/"):
+    ADMIN_URL += "/"
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
@@ -213,5 +224,17 @@ LOGOUT_REDIRECT_URL = 'login'
 
 # Email configuration (para autenticación por correo)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Para desarrollo
+
+# Production / reverse proxy security
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+
+SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", not DEBUG)
+SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", not DEBUG)
+CSRF_COOKIE_SECURE = env_bool("CSRF_COOKIE_SECURE", not DEBUG)
+SECURE_HSTS_SECONDS = env_int("SECURE_HSTS_SECONDS", 0)
+
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
 
 handler403 = 'core.views.forbidden_view'

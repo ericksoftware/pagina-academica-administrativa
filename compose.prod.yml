@@ -1,0 +1,93 @@
+name: academia-wasisv
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${DB_USER} -d ${DB_NAME}"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    mem_limit: 768m
+    cpus: 1.0
+
+    security_opt:
+      - no-new-privileges:true
+
+  backend:
+    build:
+      context: .
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    command: >
+      sh -c "
+      python manage.py migrate --noinput &&
+      python manage.py collectstatic --noinput &&
+      gunicorn config.wsgi:application
+      --bind 0.0.0.0:8000
+      --workers 2
+      --threads 2
+      --timeout 90
+      --access-logfile -
+      --error-logfile -
+      --no-control-socket
+      "
+
+    volumes:
+      - static_data:/app/staticfiles
+      - media_data:/app/media
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    mem_limit: 1024m
+    cpus: 1.5
+
+    security_opt:
+      - no-new-privileges:true
+
+  web:
+    image: nginx:alpine
+    restart: unless-stopped
+
+    ports:
+      - "127.0.0.1:8083:80"
+
+    volumes:
+      - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - static_data:/srv/static:ro
+      - media_data:/srv/media:ro
+
+    depends_on:
+      - backend
+
+    mem_limit: 256m
+    cpus: 0.75
+
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  postgres_data:
+  static_data:
+  media_data:
